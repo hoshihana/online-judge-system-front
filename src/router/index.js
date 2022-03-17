@@ -5,6 +5,8 @@ import AboutView from "@/views/AboutView";
 import ProblemListView from "@/views/ProblemListView";
 import problemSetListView from "@/views/ProblemSetListView";
 import statusListView from "@/views/StatusListView";
+import LoginView from "@/views/LoginView";
+import RegisterView from "@/views/RegisterView";
 
 Vue.use(VueRouter)
 
@@ -13,6 +15,16 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: RegisterView
   },
   {
     path: '/problem/list',

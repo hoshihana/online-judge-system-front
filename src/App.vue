@@ -8,8 +8,10 @@
         <el-header>
           <top-bar></top-bar>
         </el-header>
-        <el-main style="height: 100%; background-color: #DCDFE6">
-          <router-view></router-view>
+        <el-main style="height: 100%; background-color: #EBEEF5">
+          <keep-alive>
+            <router-view></router-view>
+          </keep-alive>
         </el-main>
       </el-container>
     </el-container>
@@ -30,7 +32,7 @@ export default {
 </script>
 
 <style>
-html, body, #app{
+html, body, #app {
   margin: 0;
   height: 100%;
 }

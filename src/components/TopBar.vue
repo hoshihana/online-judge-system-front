@@ -2,8 +2,8 @@
   <div style="height: 100%">
     <el-row type="flex" justify="end" align="middle" style="height: 100%">
         <el-button-group v-if="!loggedIn">
-          <el-button type="primary" size="small">登录</el-button>
-          <el-button size="small">注册</el-button>
+          <el-button type="primary" size="small" @click="$router.push('/login')">登录</el-button>
+          <el-button size="small" @click="$router.push('/register')">注册</el-button>
         </el-button-group>
         <el-popover v-if="loggedIn" trigger="hover" placement="bottom">
           <template #reference>
