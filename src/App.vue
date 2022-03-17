@@ -1,32 +1,37 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view/>
+    <el-container style="height: 100%;">
+      <el-aside>
+        <side-nav-bar></side-nav-bar>
+      </el-aside>
+      <el-container>
+        <el-header>
+          <top-bar></top-bar>
+        </el-header>
+        <el-main style="height: 100%; background-color: #DCDFE6">
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
+<script>
+import SideNavBar from "@/components/SideNavBar";
+import TopBar from "@/components/TopBar";
+
+export default {
+  name: 'App',
+  components: {
+    SideNavBar,
+    TopBar,
+  }
+}
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
+html, body, #app{
+  margin: 0;
+  height: 100%;
 }
 </style>
