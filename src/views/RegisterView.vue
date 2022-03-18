@@ -1,10 +1,10 @@
 <template>
-  <div style="margin: 10px 35% auto">
+  <div style="margin: 10px auto auto; width: 450px">
     <el-card>
       <template #header>
         <span>注册</span>
       </template>
-      <el-form :model="registerInfo" :rules="rules" status-icon hide-required-asterisk>
+      <el-form :model="registerInfo" :rules="rules" ref="registerForm" status-icon hide-required-asterisk>
         <el-form-item label="用户名" prop="username">
           <el-input type="text" prefix-icon="el-icon-user" placeholder="6至16位，只含数字、字母或下划线"
                     v-model="registerInfo.username"></el-input>
@@ -22,7 +22,7 @@
                     v-model="registerInfo.email"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0">注册</el-button>
+          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="submit">注册</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -63,10 +63,24 @@ export default {
         checkPassword:
           {validator: validateCheckPassword, trigger: "blur"},
         email: [
-          {require: true, message: "邮箱不能为空", trigger: "blur"},
-          {pattern: /^[\w-]+@[\w-]+(\.[\w-]+)+$/, message: "邮箱格式不正确"}
+          {required: true, message: "邮箱不能为空", trigger: "blur"},
+          {pattern: /^[\w-]+@[\w-]+(\.[\w-]+)+$/, message: "邮箱格式不正确", trigger: "blur"}
         ]
       }
+    }
+  },
+  methods: {
+    submit: function (){
+      this.$axios.post("/account/register", this.$data.registerInfo)
+      .then( (response) => {
+        this.$message({
+          message: response.data,
+          type: "success"
+        })
+      })
+      .catch((error) => {
+        this.$message.error(error.response.data)
+      })
     }
   }
 }

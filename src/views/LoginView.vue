@@ -1,5 +1,5 @@
 <template>
-  <div style="margin: 10px 35% auto">
+  <div style="margin: 10px auto auto; width: 450px">
     <el-card>
       <template #header>
         <span>登录</span>
