@@ -7,51 +7,50 @@ import problemSetListView from "@/views/ProblemSetListView";
 import statusListView from "@/views/StatusListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
-
 Vue.use(VueRouter)
 
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: LoginView
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: RegisterView
-  },
-  {
-    path: '/problem/list',
-    name: 'problemList',
-    component: ProblemListView
-  },
-  {
-    path: '/problemSet/list',
-    name: 'problemSetList',
-    component: problemSetListView
-  },
-  {
-    path: '/statusListView',
-    name: 'statusList',
-    component: statusListView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: AboutView
-  }
+    {
+        path: '/',
+        name: 'home',
+        component: HomeView
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: LoginView
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: RegisterView
+    },
+    {
+        path: '/problem/list',
+        name: 'problemList',
+        component: ProblemListView
+    },
+    {
+        path: '/problemSet/list',
+        name: 'problemSetList',
+        component: problemSetListView
+    },
+    {
+        path: '/statusListView',
+        name: 'statusList',
+        component: statusListView
+    },
+    {
+        path: '/about',
+        name: 'about',
+        component: AboutView
+    }
 ]
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes
 })
 
 export default router

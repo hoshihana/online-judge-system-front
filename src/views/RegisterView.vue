@@ -30,11 +30,13 @@
 </template>
 
 <script>
+import axios from "@/utils/axios";
+
 export default {
   name: "RegisterView",
   data: function () {
     let validateCheckPassword = (rule, value, callback) => {
-      if(value === "") {
+      if (value === "") {
         callback(new Error("重复密码不能为空"))
       } else if (value !== this.registerInfo.password) {
         callback(new Error("两次输入的密码不一致"))
@@ -61,7 +63,7 @@ export default {
           {pattern: /^[A-Za-z0-9]+$/, message: "密码只能含有数字或字母", trigger: "blur"},
         ],
         checkPassword:
-          {validator: validateCheckPassword, trigger: "blur"},
+            {validator: validateCheckPassword, trigger: "blur"},
         email: [
           {required: true, message: "邮箱不能为空", trigger: "blur"},
           {pattern: /^[\w-]+@[\w-]+(\.[\w-]+)+$/, message: "邮箱格式不正确", trigger: "blur"}
@@ -70,17 +72,18 @@ export default {
     }
   },
   methods: {
-    submit: function (){
-      this.$axios.post("/account/register", this.$data.registerInfo)
-      .then( (response) => {
-        this.$message({
-          message: response.data,
-          type: "success"
-        })
-      })
-      .catch((error) => {
-        this.$message.error(error.response.data)
-      })
+    submit: function () {
+      axios.post("/account/register", this.$data.registerInfo)
+          .then((response) => {
+            this.$message({
+              message: response.data,
+              type: "success"
+            })
+            this.$router.push("/login")
+          })
+          .catch((error) => {
+            this.$message.error(error.response.data)
+          })
     }
   }
 }

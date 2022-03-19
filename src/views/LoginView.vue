@@ -13,7 +13,7 @@
                     v-model="loginInfo.password"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0">登录</el-button>
+          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="login">登录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import axios from "@/utils/axios";
+
 export default {
   name: "LoginView",
   data: function () {
@@ -32,6 +34,26 @@ export default {
       rules: {
         username: {required: true, message: "用户名不能为空", trigger: "blur"},
         password: {required: true, message: "密码不能为空", trigger: "blur"}
+      }
+    }
+  },
+  methods: {
+    login: function () {
+      if (this.$root.isLogin) {
+        this.$message.error("已登录，如需更换账号请先登出")
+      } else {
+        axios.post("/account/login", this.$data.loginInfo)
+            .then((response) => {
+              this.$message({
+                message: response.data,
+                type: "success"
+              })
+              this.$root.isLogin = true
+              this.$router.push("/")
+            })
+            .catch((error) => {
+              this.$message.error(error.response.data)
+            })
       }
     }
   }
