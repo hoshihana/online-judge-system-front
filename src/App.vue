@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <el-container style="height: 100%;">
-      <el-aside>
+      <el-aside width="150px">
         <side-nav-bar></side-nav-bar>
       </el-aside>
       <el-container>
@@ -35,5 +35,24 @@ export default {
 html, body, #app {
   margin: 0;
   height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #909399;
+  border-radius: 3px;
+}
+
+.fa-icon {
+  width: auto;
+  height: 1em; /* 或任意其它字体大小相对值 */
+
+  /* 要在 Safari 中正常工作，需要再引入如下两行代码 */
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>

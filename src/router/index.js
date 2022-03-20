@@ -7,6 +7,8 @@ import problemSetListView from "@/views/ProblemSetListView";
 import statusListView from "@/views/StatusListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
+import ProblemView from "@/views/ProblemView";
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -29,6 +31,11 @@ const routes = [
         path: '/problem/list',
         name: 'problemList',
         component: ProblemListView
+    },
+    {
+        path: '/problem/demo',
+        name: 'problemDemo',
+        component: ProblemView
     },
     {
         path: '/problemSet/list',

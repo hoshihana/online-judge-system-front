@@ -3,11 +3,17 @@ import App from './App.vue'
 import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import 'vue-awesome/icons'
+import Icon from 'vue-awesome/components/Icon'
 import axios from "@/utils/axios";
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+Vue.use(mavonEditor)
+Vue.component('v-icon', Icon)
 
 new Vue({
     data: {
