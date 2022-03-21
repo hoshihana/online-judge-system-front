@@ -9,9 +9,7 @@
           <top-bar></top-bar>
         </el-header>
         <el-main style="height: 100%; background-color: #EBEEF5">
-          <keep-alive>
-            <router-view></router-view>
-          </keep-alive>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
