@@ -2,49 +2,38 @@
   <div>
     <el-container>
       <el-main style="padding: 0 20px 20px 0">
-        <el-card>
+        <el-card :body-style="{'padding-left': 0}">
           <template #header>
-            <el-page-header>
-              <template #content>
-                <b>{{ problem.id + ' ' + problem.name }}</b>
-              </template>
-            </el-page-header>
+            <el-button class="back-btn" type="text" icon="el-icon-back">返回</el-button>
+            <b style="font-size: larger">{{ problemDetail.id + ' ' + problemDetail.name }}</b>
           </template>
-          <el-tabs tab-position="right" >
-            <el-tab-pane label="题目详情" style="height: auto">
-              <h3>题目描述</h3>
-              <p v-html="problem.description"></p>
-              <h3>输入格式</h3>
-              <p v-html="problem.inputFormat"></p>
-              <h3>输出格式</h3>
-              <p v-html="problem.outputFormat"></p>
-              <h3>输入输出样例</h3>
-              <el-row v-for="(sample, index) in problem.samples" :key="index" style="margin: 15px">
-                <el-col :span="6">
-                  <h4>输入#{{ index + 1 }}
-                    <el-button type="text" class="copyBtn" title="复制" :data-clipboard-text="sample.input" @click="copy"
-                               style="min-height: auto; padding: 0">
-                      <v-icon name="regular/copy"></v-icon>
-                    </el-button>
-                  </h4>
-                  <el-input type="textarea" autosize :value="sample.input" readonly resize="none"></el-input>
-                </el-col>
-                <el-col :span="6" :offset="6">
-                  <h4>输出#{{ index + 1 }}</h4>
-                  <el-input type="textarea" autosize :value="sample.output" readonly resize="none"></el-input>
-                </el-col>
-              </el-row>
-              <h3>说明</h3>
-              <p v-html="problem.explanation"></p>
+          <el-tabs tab-position="left" stretch>
+            <el-tab-pane label="题目描述">
+              <problem-detail :problemDetail="problemDetail"></problem-detail>
             </el-tab-pane>
-            <el-tab-pane label="提交代码">
-              <code-editor :code.sync="code"></code-editor>
+            <el-tab-pane label="代码提交">
+              <code-editor :code.sync="codeSubmit.code" :language="codeSubmit.language"></code-editor>
+              <div style="text-align: right">
+                <el-select v-model="codeSubmit.language" placeholder="请选择代码语言" size="medium"
+                           style="margin: 20px 20px 0 0; width: 200px">
+                  <el-option
+                      v-for="option in codeSubmit.languageOptions" :key="option.value" :label="option.label"
+                      :value="option.value">
+                  </el-option>
+                </el-select>
+                <el-button type="danger" size="medium" style="margin-top: 20px">提交</el-button>
+              </div>
             </el-tab-pane>
           </el-tabs>
         </el-card>
       </el-main>
       <el-aside width="300px">
-        <el-card style="margin-bottom: 20px"></el-card>
+        <el-card style="margin-bottom: 20px">
+          <template #header>
+            <b>题目信息</b>
+          </template>
+
+        </el-card>
         <el-card style="margin-bottom: 20px"></el-card>
       </el-aside>
     </el-container>
@@ -52,15 +41,16 @@
 </template>
 
 <script>
-import Clipboard from 'clipboard'
 import CodeEditor from "@/components/CodeEditor";
+import ProblemDetail from "@/components/ProblemDetail";
 
 export default {
   name: "ProblemView",
-  components: {CodeEditor},
+  components: {ProblemDetail, CodeEditor},
   data: function () {
     return {
-      problem: {
+      showProblemDetail: true,
+      problemDetail: {
         id: 1000,
         name: "题目名",
         description: `<p>题目描述</p>`,
@@ -72,32 +62,49 @@ export default {
           {input: "2 3", output: "5"}
         ]
       },
-      code: ""
+      codeSubmit: {
+        code: "#include <bits/stdc++.h>",
+        language: "",
+        languageOptions: [{
+          value: "c",
+          label: "C"
+        }, {
+          value: "cpp",
+          label: "C++"
+        }, {
+          value: "java",
+          label: "Java"
+        }, {
+          value: "py",
+          label: "Python"
+        }, {
+          value: "js",
+          label: "JavaScript"
+        }]
+      }
     }
   },
-  methods: {
-    copy: function () {
-      let clipboard = new Clipboard(".copyBtn");
-      clipboard.on("success", () => {
-        this.$message({
-          message: "复制成功",
-          type: "success"
-        })
-        clipboard.destroy();
-      });
-      clipboard.on("error", () => {
-        this.$message.error("复制失败"),
-            clipboard.destroy();
-      });
-    }
-  }
+  // watch: {
+  //   "codeSubmit.code": function () {
+  //     console.log(this.codeSubmit.code)
+  //   }
+  // },
 }
 </script>
 <style scoped>
-h3 {
-  margin: 6px 0;
+.back-btn {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  min-height: 35px;
+  height: 30px;
+  color: black;
+  border-right: 3px solid rgb(228,231,237);
+  padding-right: 26px;
+  margin-right: 12px;
 }
-h4 {
-  margin: 4px 0;
+.back-btn:hover {
+  border-right: 3px solid rgb(228,231,237);
+  color: #409EFF;
 }
 </style>

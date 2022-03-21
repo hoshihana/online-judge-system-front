@@ -1,55 +1,82 @@
 <template>
   <div>
-    <prism-editor class="my-editor" v-model="newCode" :highlight="highlighter" @input="update"></prism-editor>
+    <codemirror class="editor-border" ref="cm" v-model="newCode" :options="options" @input="update"></codemirror>
   </div>
 </template>
 
 <script>
-import {PrismEditor} from 'vue-prism-editor';
-import 'vue-prism-editor/dist/prismeditor.min.css';
-
-import {highlight, languages} from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism-coy.css';
+import {codemirror} from 'vue-codemirror'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/mode/javascript/javascript.js'
+import 'codemirror/mode/clike/clike.js'
+import 'codemirror/mode/python/python.js'
+import 'codemirror/theme/idea.css'
+import 'codemirror/addon/selection/active-line'
+import 'codemirror/addon/selection/selection-pointer'
+import 'codemirror/addon/scroll/simplescrollbars.css'
+import 'codemirror/addon/scroll/simplescrollbars'
+import 'codemirror/addon/display/autorefresh'
 
 export default {
   name: "CodeEditor",
+  components: {
+    codemirror
+  },
   data: function () {
     return {
-      newCode: "console.log('hello world')",
+      newCode: "",
+      options: {
+        tabSize: 4,
+        mode: "text/x-c++src",
+        theme: "idea",
+        lineNumbers: true,
+        line: true,
+        styleActiveLine: true,
+        scrollbarStyle: 'overlay',
+        autoRefresh: true
+      }
     }
   },
-  props: ['code'],
-  components: {
-    PrismEditor
-  },
+  props: ["code", "language"],
   methods: {
-    highlighter: function () {
-      return highlight(this.newCode, languages.js, "js");
-    },
     update: function () {
       this.$emit("update:code", this.newCode)
+    },
+    getMode: function (language) {
+      switch (language) {
+        case "c": return "text/x-csrc"
+        case "cpp": return "text/x-c++src"
+        case "java": return "text/x-java"
+        case "py": return "text/x-python"
+        case "js": return "text/javascript"
+        default: return ""
+      }
+    },
+  },
+  watch: {
+    language: function (val) {
+      this.options.mode = this.getMode(val)
     }
+  },
+  mounted() {
+    this.newCode = this.code
+    this.options.mode = this.getMode(this.language)
+    this.$refs.cm.codemirror.setSize("auto", (document.documentElement.clientHeight - 290) + "px")
+    this.$nextTick(() => {
+      window.addEventListener('resize', () => {
+        //监听浏览器窗口大小改变
+        //浏览器变化执行动作
+        this.$refs.cm.codemirror.setSize("auto", (document.documentElement.clientHeight - 290) + "px")
+      });
+    })
   }
 }
 </script>
 
 <style scoped>
-.my-editor {
-  /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
-  background: rgb(240,240,240);
-  /* you must provide font-family font-size line-height. Example: */
-  font-family: Consolas;
-  font-size: 14px;
-  line-height: 1.5;
-  width: 90%;
-  height: 500px;
-  padding: 10px 20px;
-}
-
-/* optional class for removing the outline */
-.prism-editor__textarea:focus {
-  outline: none;
+.editor-border {
+  border-width: 3px;
+  border-style: dashed dashed dashed none;
+  border-color: rgb(230,230,230)
 }
 </style>

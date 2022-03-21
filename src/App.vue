@@ -5,7 +5,7 @@
         <side-nav-bar></side-nav-bar>
       </el-aside>
       <el-container>
-        <el-header>
+        <el-header height="50px">
           <top-bar></top-bar>
         </el-header>
         <el-main style="height: 100%; background-color: #EBEEF5">

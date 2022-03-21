@@ -1,9 +1,9 @@
 <template>
   <div style="height: 100%">
     <el-row type="flex" justify="end" align="middle" style="height: 100%">
-      <el-button-group v-if="notLogin">
-        <el-button type="primary" size="small" @click="$router.push('/login')">登录</el-button>
-        <el-button size="small" @click="$router.push('/register')">注册</el-button>
+      <el-button-group v-if="notLogin" style="font-size: small">
+        <el-button type="primary" size="mini" @click="$router.push('/login')">登录</el-button>
+        <el-button size="mini" @click="$router.push('/register')">注册</el-button>
       </el-button-group>
       <el-popover v-else trigger="hover" placement="bottom">
         <template #reference>
