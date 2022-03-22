@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-container>
+    <el-container v-loading="loading">
       <el-main style="padding: 0 20px 20px 0">
         <el-card :body-style="{'padding-left': 0}">
           <template #header>
@@ -30,9 +30,50 @@
       <el-aside width="300px">
         <el-card style="margin-bottom: 20px">
           <template #header>
-            <b>题目信息</b>
+            <h3 style="margin: 5px 0">题目信息</h3>
           </template>
+          <el-row>
+            <el-col :span="12" style="text-align: left">
+              <b><font-awesome-icon icon="fa-solid fa-user" fixed-width></font-awesome-icon>作者</b>
+            </el-col>
+            <el-col :span="12" style="text-align: right">
+              {{ problemDetail.authorId }}
+            </el-col>
+          </el-row>
+          <el-divider class="divider"></el-divider>
+          <el-row>
+            <el-col :span="12" style="text-align: left">
+              <b><font-awesome-icon icon="fa-solid fa-clock" fixed-width></font-awesome-icon>时间限制</b>
+            </el-col>
+            <el-col :span="12" style="text-align: right">
+              {{ problemDetail.timeLimit + "ms" }}
+            </el-col>
+          </el-row>
+          <el-divider class="divider"></el-divider>
+          <el-row>
+            <el-col :span="12" style="text-align: left">
+              <b><font-awesome-icon icon="fa-solid fa-memory" fixed-width></font-awesome-icon>空间限制</b>
+            </el-col>
+            <el-col :span="12" style="text-align: right">
+              {{ problemDetail.memoryLimit + "MB" }}
+            </el-col>
+          </el-row>
+          <el-divider class="divider"></el-divider>
+          <el-row>
+            <el-col :span="12" style="text-align: left">
+              <div style="margin-bottom: 10px">
+                <b><font-awesome-icon icon="fa-solid fa-circle-right" fixed-width></font-awesome-icon>提交人数：</b>
+                <span style="color: #E6A23C">{{ problemDetail.submit }}</span>
+              </div>
+              <div>
+                <b><font-awesome-icon icon="fa-solid fa-circle-check" fixed-width></font-awesome-icon>通过人数：</b> <!--todo 区分总提交数、提交人数、总通过数和通过人数-->
+                <span style="color: #67C23A">{{ problemDetail.accept }}</span>
+              </div>
+            </el-col>
+            <el-col :span="12" style="text-align: right">
 
+            </el-col>
+          </el-row>
         </el-card>
         <el-card style="margin-bottom: 20px"></el-card>
       </el-aside>
@@ -43,24 +84,30 @@
 <script>
 import CodeEditor from "@/components/CodeEditor";
 import ProblemDetail from "@/components/ProblemDetail";
+import axios from "@/utils/axios";
 
 export default {
   name: "ProblemView",
   components: {ProblemDetail, CodeEditor},
+  props: ["id"],
   data: function () {
     return {
+      loading: false,
       showProblemDetail: true,
       problemDetail: {
-        id: 1000,
-        name: "题目名",
-        description: `<p>题目描述</p>`,
-        inputFormat: `<p>输入格式</p>`,
-        outputFormat: `<p>输出格式</p>`,
-        explanation: `<p>说明</p>`,
-        samples: [
-          {input: "1 1", output: "2"},
-          {input: "2 3", output: "5"}
-        ]
+        id: null,
+        authorId: null,
+        name: "",
+        description: "",
+        inputFormat: "",
+        outputFormat: "",
+        explanation: "",
+        timeLimit: null,
+        memoryLimit: null,
+        visibility: null,
+        samples: "",
+        submit: null,
+        accept: null
       },
       codeSubmit: {
         code: "#include <bits/stdc++.h>",
@@ -84,11 +131,23 @@ export default {
       }
     }
   },
-  // watch: {
-  //   "codeSubmit.code": function () {
-  //     console.log(this.codeSubmit.code)
-  //   }
-  // },
+  methods: {
+    update: function () {
+      this.loading = true
+      axios.get("/problem/" + this.id)
+          .then((response) => {
+            this.problemDetail = response.data
+            this.loading = false
+          })
+          .catch((error) => {
+            this.loading = false
+            this.$message.error(error.response.data)
+          })
+    }
+  },
+  mounted: function () {
+    this.update();
+  }
 }
 </script>
 <style scoped>
@@ -99,12 +158,17 @@ export default {
   min-height: 35px;
   height: 30px;
   color: black;
-  border-right: 3px solid rgb(228,231,237);
+  border-right: 3px solid rgb(228, 231, 237);
   padding-right: 26px;
   margin-right: 12px;
 }
+
 .back-btn:hover {
-  border-right: 3px solid rgb(228,231,237);
+  border-right: 3px solid rgb(228, 231, 237);
   color: #409EFF;
+}
+
+.divider {
+  margin: 15px 0;
 }
 </style>

@@ -8,10 +8,13 @@ import statusListView from "@/views/StatusListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
 import ProblemView from "@/views/ProblemView";
+import axios from "@/utils/axios";
+import ProblemEditView from "@/views/ProblemEditView";
 
 Vue.use(VueRouter)
 
 const routes = [
+    // todo 配置404页面
     {
         path: '/',
         name: 'home',
@@ -33,9 +36,15 @@ const routes = [
         component: ProblemListView
     },
     {
-        path: '/problem/demo',
-        name: 'problemDemo',
-        component: ProblemView
+        path: '/problem/edit',
+        name: 'problemEdit',
+        component: ProblemEditView,
+    },
+    {
+        path: '/problem/:id',
+        name: 'problem',
+        component: ProblemView,
+        props: true
     },
     {
         path: '/problemSet/list',
@@ -58,6 +67,28 @@ const router = new VueRouter({
     mode: 'history',
     base: process.env.BASE_URL,
     routes
+})
+
+router.beforeEach((to, from, next) => {
+    axios.post("/account/isLogin")
+        .then((response) => {
+            router.app.$root.isLogin = response.data  // router.app对应Vue实例的this
+            if (response.data) {
+                router.app.$root.isLogin = true
+                next()
+            } else {
+                router.app.$root.isLogin = false
+                if (to.path === "/" || to.path === "/login" || to.path === "/register") {
+                    next();
+                } else {
+                    router.app.$message.error("请先登录后查看")
+                    next(false)
+                }
+            }
+        })
+        .catch((error) => {
+            console.log(error.response.data)
+        })
 })
 
 export default router

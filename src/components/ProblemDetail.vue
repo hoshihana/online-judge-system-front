@@ -1,23 +1,23 @@
 <template>
   <div>
-    <h3>题目描述</h3>
+    <h3>题目描述</h3>   <!--todo 数据库中存储的是未渲染的md文本，此处应先渲染成html-->
     <p v-html="problemDetail.description"></p>
     <h3>输入格式</h3>
     <p v-html="problemDetail.inputFormat"></p>
     <h3>输出格式</h3>
     <p v-html="problemDetail.outputFormat"></p>
     <h3>输入输出样例</h3>
-    <el-row v-for="(sample, index) in problemDetail.samples" :key="index" style="margin: 15px">
-      <el-col :span="6">
+    <el-row v-for="(sample, index) in samples" :key="index" style="margin: 15px">
+      <el-col :span="9">
         <h4>输入#{{ index + 1 }}
           <el-button type="text" class="copyBtn" title="复制" :data-clipboard-text="sample.input" @click="copy"
                      style="min-height: auto; padding: 0">
-            <v-icon name="regular/copy"></v-icon>
+            <font-awesome-icon icon="fa-regular fa-copy" color="#409EFF"></font-awesome-icon>
           </el-button>
         </h4>
         <el-input type="textarea" autosize :value="sample.input" readonly resize="none"></el-input>
       </el-col>
-      <el-col :span="6" :offset="6">
+      <el-col :span="9" :offset="5">
         <h4>输出#{{ index + 1 }}</h4>
         <el-input type="textarea" autosize :value="sample.output" readonly resize="none"></el-input>
       </el-col>
@@ -33,6 +33,11 @@ import Clipboard from 'clipboard'
 export default {
   name: "ProblemDetail",
   props: ["problemDetail"],
+  computed: {
+    samples: function () {
+      return JSON.parse(this.problemDetail.samples)
+    }
+  },
   methods: {
     copy: function () {
       let clipboard = new Clipboard(".copyBtn");

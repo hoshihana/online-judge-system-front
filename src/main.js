@@ -3,17 +3,20 @@ import App from './App.vue'
 import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import 'vue-awesome/icons'
-import Icon from 'vue-awesome/components/Icon'
-import axios from "@/utils/axios";
-import mavonEditor from 'mavon-editor'
-import 'mavon-editor/dist/css/index.css'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUser, faClock, faMemory, faCircleRight, faCircleCheck, faXmark }from '@fortawesome/free-solid-svg-icons'
+import { faCopy } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+/* add icons to the library */
+library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck, faXmark)
+
+/* add font awesome icon component */
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
-Vue.use(mavonEditor)
-Vue.component('v-icon', Icon)
 
 new Vue({
     data: {
@@ -21,25 +24,4 @@ new Vue({
     },
     router,
     render: h => h(App),
-    beforeCreate() {
-        // 初始化isLogin
-        axios.post("/account/isLogin")
-            .then((response) => {
-                this.isLogin = response.data
-            })
-            .catch((error) => {
-                console.log(error.response.data)
-            })
-        // 每次路由前检查登录状态
-        this.$router.beforeEach((to, from, next) => {
-            axios.post("/account/isLogin")
-                .then((response) => {
-                    this.$root.isLogin = response.data
-                })
-                .catch((error) => {
-                    console.log(error.response.data)
-                })
-            next()
-        })
-    }
 }).$mount('#app')
