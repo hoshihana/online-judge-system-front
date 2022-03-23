@@ -1,12 +1,16 @@
 <template>
   <div>
-    <h3>题目描述</h3>   <!--todo 数据库中存储的是未渲染的md文本，此处应先渲染成html-->
-    <p v-html="problemDetail.description"></p>
+    <h3>题目描述</h3>
+    <mavon-editor class="preview" :value="problemDetail.description" :box-shadow="false" previewBackground="#ffffff"
+                  :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
     <h3>输入格式</h3>
-    <p v-html="problemDetail.inputFormat"></p>
+    <mavon-editor class="preview" :value="problemDetail.inputFormat" :box-shadow="false" previewBackground="#ffffff"
+                  :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
     <h3>输出格式</h3>
-    <p v-html="problemDetail.outputFormat"></p>
+    <mavon-editor class="preview" :value="problemDetail.outputFormat" :box-shadow="false" previewBackground="#ffffff"
+                  :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
     <h3>输入输出样例</h3>
+    <el-row v-if="samples === undefined || samples.length === 0" style="margin: 15px;">无</el-row>
     <el-row v-for="(sample, index) in samples" :key="index" style="margin: 15px">
       <el-col :span="9">
         <h4>输入#{{ index + 1 }}
@@ -23,19 +27,25 @@
       </el-col>
     </el-row>
     <h3>说明</h3>
-    <p v-html="problemDetail.explanation"></p>
+    <mavon-editor class="preview" :value="problemDetail.explanation" :box-shadow="false" previewBackground="#ffffff"
+                  :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
   </div>
 </template>
 
 <script>
 import Clipboard from 'clipboard'
+import {mavonEditor} from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 
 export default {
   name: "ProblemDetail",
   props: ["problemDetail"],
+  components: {
+    mavonEditor
+  },
   computed: {
     samples: function () {
-      return JSON.parse(this.problemDetail.samples)
+      return eval(this.problemDetail.samples)
     }
   },
   methods: {
@@ -52,7 +62,7 @@ export default {
         this.$message.error("复制失败")
         clipboard.destroy();
       });
-    }
+    },
   }
 }
 </script>
@@ -64,5 +74,10 @@ h3 {
 
 h4 {
   margin: 4px 0;
+}
+
+.preview {
+  border: none;
+  min-height: 0
 }
 </style>

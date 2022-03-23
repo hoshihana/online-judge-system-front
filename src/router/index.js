@@ -36,15 +36,21 @@ const routes = [
         component: ProblemListView
     },
     {
-        path: '/problem/edit',
-        name: 'problemEdit',
-        component: ProblemEditView,
+        path: '/problem/new',
+        name: 'problemNew',
+        component: ProblemEditView
     },
     {
         path: '/problem/:id',
         name: 'problem',
         component: ProblemView,
         props: true
+    },
+    {
+        path: '/problem/:id/edit',
+        name: 'problemEdit',
+        component: ProblemEditView,
+        props: true,
     },
     {
         path: '/problemSet/list',
@@ -70,14 +76,12 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    axios.post("/account/isLogin")
+    axios.get("/account/login/status")
         .then((response) => {
-            router.app.$root.isLogin = response.data  // router.app对应Vue实例的this
-            if (response.data) {
-                router.app.$root.isLogin = true
+            router.app.$root.loginStatus = response.data  // router.app对应Vue实例的this
+            if (router.app.$root.loginStatus.login) {
                 next()
             } else {
-                router.app.$root.isLogin = false
                 if (to.path === "/" || to.path === "/login" || to.path === "/register") {
                     next();
                 } else {
@@ -87,7 +91,8 @@ router.beforeEach((to, from, next) => {
             }
         })
         .catch((error) => {
-            console.log(error.response.data)
+            router.app.$message.error(error.response.data)
+            next(false)
         })
 })
 

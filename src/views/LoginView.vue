@@ -42,7 +42,7 @@ export default {
       if (this.$root.isLogin) {
         this.$message.error("已登录，如需更换账号请先登出")
       } else {
-        axios.post("/account/login", this.$data.loginInfo)
+        axios.post("/account/login", this.loginInfo)
             .then((response) => {
               this.$message({
                 message: response.data,

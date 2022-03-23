@@ -2,20 +2,34 @@
   <div>
     <el-card v-loading="loading">
       <template #header>
-        <el-button class="back-btn" type="text" icon="el-icon-back">返回</el-button>
-        <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
-                  style="width: 70%"></el-input> <!--todo 可改成点击修改模式-->
+        <el-row v-if="$route.name === 'problemNew'">
+          <el-col :span="12" style="text-align: left">
+            <el-button type="primary" size="medium" plain>返回我的题库</el-button>
+          </el-col>
+          <el-col :span="12" style="text-align: right"><b style="font-size: x-large">题目创建</b></el-col>
+        </el-row>
+        <el-row v-else>
+          <el-col :span="12" style="text-align: left">
+            <el-button type="primary" size="medium" plain @click="backToProblem">返回题目</el-button>
+            <el-button type="danger" size="medium" plain>删除题目</el-button>
+          </el-col>
+          <el-col :span="12" style="text-align: right"><b style="font-size: x-large">题目编辑</b></el-col>
+        </el-row>
       </template>
       <el-tabs tab-position="left" stretch>
         <el-tab-pane label="题目编辑">
+          <h3>题目名<b style="color: #F56C6C">*</b></h3>
+          <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
+                    style="width: 80%; margin: 15px"></el-input>
           <h3>题目描述</h3>
-          <mavon-editor v-model="description" :html="false" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
           <br>
           <h3>输入格式</h3>
-          <mavon-editor v-model="inputFormat" :html="false" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <mavon-editor v-model="inputFormat" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
           <br>
           <h3>输出格式</h3>
-          <mavon-editor v-model="outputFormat" :html="false" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <mavon-editor v-model="outputFormat" :toolbars="toolbars" :xssOptions="{}"
+                        style="margin: 15px"></mavon-editor>
           <br>
           <h3>输入输出样例
             <el-button type="text" @click="addSample">添加样例</el-button>
@@ -39,7 +53,10 @@
           </div>
           <br>
           <h3>说明</h3>
-          <mavon-editor :html="false" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <mavon-editor v-model="explanation" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <div style="text-align: right">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">保存</el-button>
+          </div>
         </el-tab-pane>
         <el-tab-pane label="数据点配置">
           <!--数据点配置-->
@@ -52,13 +69,17 @@
 <script>
 import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
+import axios from "@/utils/axios";
+import router from "@/router";
+// import router from "@/router";
 
-// todo 编辑后未保存提示
+//  todo 编辑后未保存提示
 export default {
   name: "ProblemEditView",
   components: {
     mavonEditor
   },
+  props: ["id"],
   data: function () {
     return {
       loading: false,
@@ -97,8 +118,7 @@ export default {
         subfield: true, // 单双栏模式
         preview: true, // 预览
       },
-      name: "", // todo 提交时题目名不能为空
-      id: null,
+      name: "",
       authorId: null,
       description: "",
       inputFormat: "",
@@ -113,6 +133,41 @@ export default {
       }],
     }
   },
+  beforeRouteEnter: function (to, from, next) {
+    axios.get("/problem/" + to.params.id)
+        .then((response) => {
+          if (response.data.authorId !== router.app.$root.loginStatus.userid) {
+            router.app.$message.error("无权访问该题目")
+            next(false)
+          } else {
+            next()
+          }
+        })
+        .catch((error) => {
+          router.app.$message.error(error.response.data)
+          next(false)
+        })
+  },
+  mounted: function () {
+    this.loading = true
+    axios.get("/problem/" + this.id)
+        .then((response) => {
+          this.name = response.data.name
+          this.authorId = response.data.authorId
+          this.description = response.data.description
+          this.inputFormat = response.data.inputFormat
+          this.outputFormat = response.data.outputFormat
+          this.samples = eval(response.data.samples)
+          this.explanation = response.data.explanation
+          this.timeLimit = response.data.timeLimit
+          this.memoryLimit = response.memoryLimit
+          this.loading = false
+        })
+        .catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+  },
   methods: {
     addSample: function () {
       this.samples.push({
@@ -122,29 +177,76 @@ export default {
     },
     removeSample: function (index) {
       this.samples.splice(index, 1)
+    },
+    save: function () {
+      if (this.$route.name === "problemNew") {
+        this.newProblem()
+      } else {
+        this.editProblem()
+      }
+    },
+    newProblem: function () {
+      if (this.name === "") {
+        this.$message.error("题目名不能为空")
+      } else {
+        this.loading = true
+        axios.post("/problem/", {
+          "name": this.name,
+          "description": this.description,
+          "inputFormat": this.inputFormat,
+          "outputFormat": this.outputFormat,
+          "explanation": this.explanation,
+          "samples": JSON.stringify(this.samples),
+          "timeLimit": 500,
+          "memoryLimit": 128
+        }).then((response) => {
+          this.loading = false
+          this.$message({
+            message: "题目创建成功",
+            type: "success"
+          })
+          this.$router.push("/problem/" + response.data)
+        }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      }
+    },
+    editProblem: function () {
+      if (this.name === "") {
+        this.$message.error("题目名不能为空")
+      } else {
+        this.loading = true
+        axios.patch("/problem/" + this.id, {
+          "name": this.name,
+          "description": this.description,
+          "inputFormat": this.inputFormat,
+          "outputFormat": this.outputFormat,
+          "explanation": this.explanation,
+          "samples": JSON.stringify(this.samples),
+          "timeLimit": 500,   //todo 待传入数据（注意要传入整数，不能是字符串，否则后端报错）
+          "memoryLimit": 128,
+        }).then((response) => {
+          this.loading = false
+          this.$message({
+            message: "题目编辑成功",
+            type: "success"
+          })
+          this.$router.push("/problem/" + response.data)
+        }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      }
+    },
+    backToProblem: function () {
+      this.$router.push("/problem/" + this.id)
     }
   }
 }
 </script>
 
 <style scoped>
-.back-btn {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  min-height: 35px;
-  height: 30px;
-  color: black;
-  border-right: 3px solid rgb(228, 231, 237);
-  padding-left: 20px;
-  padding-right: 40px;
-  margin-right: 12px;
-}
-
-.back-btn:hover {
-  border-right: 3px solid rgb(228, 231, 237);
-  color: #409EFF;
-}
 
 .sample-div {
   width: 80%;
