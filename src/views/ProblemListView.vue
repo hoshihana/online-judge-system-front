@@ -1,23 +1,23 @@
 <template>
   <div>
-    <el-card v-loading="loading">
+    <el-card v-loading="loading"  body-style="padding-top: 2px">
       <template #header>
         <el-input :placeholder="placeholder" v-model="key" clearable prefix-icon="el-icon-search"
                   style="width: 250px" @input="update" maxlength="40"></el-input>
         <el-switch v-model="byId" active-text="按题号查询" style="margin-left: 10px" @change="update"></el-switch>
       </template>
-      <el-table :data="problemBriefs" stripe style="width: 100%">
-        <el-table-column label="题号" min-width="5">
+      <el-table :data="problemEntries" stripe style="width: 100%">
+        <el-table-column label="题号" min-width="1">
           <template #default="scope">
             <el-link :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column label="题目名" min-width="40">
+        <el-table-column label="题目名" min-width="8">
           <template #default="scope">
             <el-link :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column label="通过率" min-width="10" align="right">
+        <el-table-column label="通过率" min-width="2" align="right">
           <template #default="scope">
             <el-tooltip effect="dark" placement="left">
               <el-tag size="small">
@@ -46,6 +46,8 @@
 <script>
 import axios from "@/utils/axios";
 
+//todo 页面太宽，也许侧边可以加些其他元素
+
 export default {
   name: "ProblemsView",
   data: function () {
@@ -56,7 +58,7 @@ export default {
       total: 0,
       pageIndex: 1,
       pageSize: 20,
-      problemBriefs: []
+      problemEntries: []
     }
   },
   computed: {
@@ -67,14 +69,14 @@ export default {
   methods: {
     update: function () {
       this.loading = true;
-      axios.get("/problem/amount", {
+      axios.get("/problemEntries/public/amount", {
         params: {
           "key": this.key,
           "byId": this.byId
         }
       }).then((response) => {
         this.total = response.data;
-        axios.get("/problem", {
+        axios.get("/problemEntries/public", {
           params: {
             "key": this.key,
             "byId": this.byId,
@@ -82,7 +84,7 @@ export default {
             "pageSize": this.pageSize
           }
         }).then((response) => {
-          this.problemBriefs = response.data
+          this.problemEntries = response.data
           this.loading = false
         }).catch((error) => {
           this.loading = false

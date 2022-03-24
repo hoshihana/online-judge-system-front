@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     submit: function () {
-      axios.post("/account/register", this.$data.registerInfo)
+      axios.post("/accounts/register", this.$data.registerInfo)
           .then((response) => {
             this.$message({
               message: response.data,

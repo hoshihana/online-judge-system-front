@@ -4,12 +4,28 @@ import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faUser, faClock, faMemory, faCircleRight, faCircleCheck, faXmark} from '@fortawesome/free-solid-svg-icons'
+import {
+    faUser,
+    faClock,
+    faMemory,
+    faCircleRight,
+    faCircleCheck,
+    faXmark,
+    faArrowRightFromBracket,
+    faHomeUser,
+    faAddressCard,
+    faBarsStaggered,
+    faPenToSquare,
+    faArrowLeft,
+    faTrashCan, faFloppyDisk, faPlus
+} from '@fortawesome/free-solid-svg-icons'
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
 /* add icons to the library */
-library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck, faXmark)
+library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
+    faXmark, faArrowRightFromBracket, faHomeUser, faAddressCard, faBarsStaggered,
+    faPenToSquare, faArrowLeft, faTrashCan, faFloppyDisk, faPlus)
 
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)

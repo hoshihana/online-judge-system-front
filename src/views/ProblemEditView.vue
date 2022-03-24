@@ -2,18 +2,24 @@
   <div>
     <el-card v-loading="loading">
       <template #header>
-        <el-row v-if="$route.name === 'problemNew'">
-          <el-col :span="12" style="text-align: left">
-            <el-button type="primary" size="medium" plain>返回我的题库</el-button>
+        <el-row v-if="!existent">
+          <el-col :span="8" style="text-align: left">
+            <el-button type="primary" size="medium" plain @click="backToUserProblemList">
+              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon> 返回我的题库
+            </el-button>
           </el-col>
-          <el-col :span="12" style="text-align: right"><b style="font-size: x-large">题目创建</b></el-col>
+          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目创建</b></el-col>
         </el-row>
         <el-row v-else>
-          <el-col :span="12" style="text-align: left">
-            <el-button type="primary" size="medium" plain @click="backToProblem">返回题目</el-button>
-            <el-button type="danger" size="medium" plain>删除题目</el-button>
+          <el-col :span="8" style="text-align: left">
+            <el-button type="primary" size="medium" plain @click="backToProblem">
+              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon> 返回题目
+            </el-button>
+            <el-button type="danger" size="medium" plain @click="deleteProblem">
+              <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon> 删除题目
+            </el-button>
           </el-col>
-          <el-col :span="12" style="text-align: right"><b style="font-size: x-large">题目编辑</b></el-col>
+          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目编辑：{{id + " " + name}}</b></el-col>
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch>
@@ -55,7 +61,9 @@
           <h3>说明</h3>
           <mavon-editor v-model="explanation" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">保存</el-button>
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
+              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon> 保存
+            </el-button>
           </div>
         </el-tab-pane>
         <el-tab-pane label="数据点配置">
@@ -71,9 +79,7 @@ import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
 import router from "@/router";
-// import router from "@/router";
 
-//  todo 编辑后未保存提示
 export default {
   name: "ProblemEditView",
   components: {
@@ -83,6 +89,8 @@ export default {
   data: function () {
     return {
       loading: false,
+      saved: false,
+      existent: false,
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -127,46 +135,67 @@ export default {
       timeLimit: 1000,
       memoryLimit: 128,
       visibility: null,
-      samples: [{
-        input: "",
-        output: ""
-      }],
+      samples: [],
     }
   },
   beforeRouteEnter: function (to, from, next) {
-    axios.get("/problem/" + to.params.id)
-        .then((response) => {
-          if (response.data.authorId !== router.app.$root.loginStatus.userid) {
-            router.app.$message.error("无权访问该题目")
+    if(to.fullPath === "/problem/new") {
+      next()
+    } else {
+      axios.get("/problems/" + to.params.id + "/authorId")
+          .then((response) => {
+            if (response.data !== router.app.$root.loginStatus.userid) {
+              router.app.$message.error("无权编辑该题目")
+              next(false)
+            } else {
+              next()
+            }
+          })
+          .catch((error) => {
+            router.app.$message.error(error.response.data)
             next(false)
-          } else {
-            next()
-          }
-        })
-        .catch((error) => {
-          router.app.$message.error(error.response.data)
-          next(false)
-        })
+          })
+    }
+  },
+  beforeRouteLeave: function (to, from, next) {
+    if (this.saved) {
+      next()
+    } else {
+      this.$confirm('可能有未保存的修改, 是否继续离开?', '确认信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        next()
+      }).catch(() => {
+        next(false)
+      });
+    }
   },
   mounted: function () {
-    this.loading = true
-    axios.get("/problem/" + this.id)
-        .then((response) => {
-          this.name = response.data.name
-          this.authorId = response.data.authorId
-          this.description = response.data.description
-          this.inputFormat = response.data.inputFormat
-          this.outputFormat = response.data.outputFormat
-          this.samples = eval(response.data.samples)
-          this.explanation = response.data.explanation
-          this.timeLimit = response.data.timeLimit
-          this.memoryLimit = response.memoryLimit
-          this.loading = false
-        })
-        .catch((error) => {
-          this.loading = false
-          this.$message.error(error.response.data)
-        })
+    if(this.$route.fullPath === "/problem/new") {
+      this.existent = false
+    } else {
+      this.existent = true
+      this.loading = true
+      axios.get("/problems/" + this.id)
+          .then((response) => {
+            this.loading = false
+            this.name = response.data.name
+            this.authorId = response.data.authorId
+            this.description = response.data.description
+            this.inputFormat = response.data.inputFormat
+            this.outputFormat = response.data.outputFormat
+            this.samples = eval(response.data.samples)
+            this.explanation = response.data.explanation
+            this.timeLimit = response.data.timeLimit
+            this.memoryLimit = response.data.memoryLimit
+          })
+          .catch((error) => {
+            this.loading = false
+            this.$message.error(error.response.data)
+          })
+    }
   },
   methods: {
     addSample: function () {
@@ -179,7 +208,7 @@ export default {
       this.samples.splice(index, 1)
     },
     save: function () {
-      if (this.$route.name === "problemNew") {
+      if (!this.existent) {
         this.newProblem()
       } else {
         this.editProblem()
@@ -190,14 +219,14 @@ export default {
         this.$message.error("题目名不能为空")
       } else {
         this.loading = true
-        axios.post("/problem/", {
+        axios.post("/problems/", {
           "name": this.name,
           "description": this.description,
           "inputFormat": this.inputFormat,
           "outputFormat": this.outputFormat,
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
-          "timeLimit": 500,
+          "timeLimit": 500,   //todo 待传入数据（注意要传入整数，不能是字符串，否则后端报错）
           "memoryLimit": 128
         }).then((response) => {
           this.loading = false
@@ -205,7 +234,8 @@ export default {
             message: "题目创建成功",
             type: "success"
           })
-          this.$router.push("/problem/" + response.data)
+          this.saved = true
+          this.$router.replace("/problem/" + response.data)
         }).catch((error) => {
           this.loading = false
           this.$message.error(error.response.data)
@@ -217,7 +247,7 @@ export default {
         this.$message.error("题目名不能为空")
       } else {
         this.loading = true
-        axios.patch("/problem/" + this.id, {
+        axios.patch("/problems/" + this.id, {
           "name": this.name,
           "description": this.description,
           "inputFormat": this.inputFormat,
@@ -232,15 +262,42 @@ export default {
             message: "题目编辑成功",
             type: "success"
           })
-          this.$router.push("/problem/" + response.data)
+          this.saved = true
+          this.$router.replace("/problem/" + response.data)
         }).catch((error) => {
           this.loading = false
           this.$message.error(error.response.data)
         })
       }
     },
+    deleteProblem: function () {
+      this.$confirm('此操作将永久删除该题目, 是否继续?', '确认信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        axios.delete("/problems/" + this.id)
+            .then(() => {
+              this.loading = false
+              this.$message({
+                type: 'success',
+                message: '题目删除成功'
+              });
+              this.saved = true
+              this.$router.go(-1)
+            }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      }).catch(() => {
+      })
+    },
     backToProblem: function () {
-      this.$router.push("/problem/" + this.id)
+      this.$router.replace("/problem/" + this.id)
+    },
+    backToUserProblemList: function () {
+      this.$router.replace("/user/" + this.$root.loginStatus.userid + "/problem/list")
     }
   }
 }

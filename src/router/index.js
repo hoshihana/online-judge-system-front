@@ -3,13 +3,17 @@ import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AboutView from "@/views/AboutView";
 import ProblemListView from "@/views/ProblemListView";
-import problemSetListView from "@/views/ProblemSetListView";
+import ProblemSetListView from "@/views/ProblemSetListView";
 import statusListView from "@/views/StatusListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
 import ProblemView from "@/views/ProblemView";
 import axios from "@/utils/axios";
 import ProblemEditView from "@/views/ProblemEditView";
+import UserView from "@/views/UserView";
+import UserHomeView from "@/views/UserHomeView";
+import UserProfileView from "@/views/UserProfileView";
+import UserProblemListView from "@/views/UserProblemListView";
 
 Vue.use(VueRouter)
 
@@ -53,9 +57,35 @@ const routes = [
         props: true,
     },
     {
+        path: '/user/:id',
+        name: 'user',
+        component: UserView,
+        props: true,
+        children: [
+            {
+                path: '',
+                name: 'userHome',
+                component: UserHomeView,
+                props: true
+            },
+            {
+                path: 'profile',
+                name: 'userProfile',
+                component: UserProfileView,
+                props: true
+            },
+            {
+                path: 'problem/list',
+                name: 'userProblemList',
+                component: UserProblemListView,
+                props: true
+            }
+        ]
+    },
+    {
         path: '/problemSet/list',
         name: 'problemSetList',
-        component: problemSetListView
+        component: ProblemSetListView
     },
     {
         path: '/statusListView',
@@ -76,7 +106,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    axios.get("/account/login/status")
+    axios.get("/accounts/loginStatus")
         .then((response) => {
             router.app.$root.loginStatus = response.data  // router.app对应Vue实例的this
             if (router.app.$root.loginStatus.login) {

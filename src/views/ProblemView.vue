@@ -6,12 +6,14 @@
           <template #header>
             <el-row>
               <el-col :span="12" style="text-align: left">
-                <el-button class="back-btn" type="text" icon="el-icon-back" @click="back">返回</el-button>
+                <el-button class="back-btn" type="text" @click="back"><font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon> 返回</el-button>
                 <span style="vertical-align: bottom"><b
                     style="font-size: x-large">{{ problemDetail.id + ' ' + problemDetail.name }}</b></span>
               </el-col>
               <el-col :span="12" style="text-align: right">
-                <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium" plain @click="editProblem">编辑题目</el-button>
+                <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium" plain @click="editProblem">
+                  <font-awesome-icon icon="fa-solid fa-pen-to-square"></font-awesome-icon> 编辑题目
+                </el-button>
               </el-col>
             </el-row>
           </template>
@@ -156,11 +158,11 @@ export default {
   methods: {
     update: function () {
       this.loading = this.authorLoading = true
-      axios.get("/problem/" + this.id)
+      axios.get("/problems/" + this.id)
           .then((response) => {
             this.problemDetail = response.data
             this.loading = false
-            axios.get("/account/username", {
+            axios.get("/accounts/username", {
               params: {
                 "id": this.problemDetail.authorId
               }
@@ -179,10 +181,10 @@ export default {
 
     },
     back: function () {
-      this.$router.push("/problem/list")
+      this.$router.go(-1)
     },
     editProblem: function () {
-      this.$router.push(this.$route.path + "/edit")
+      this.$router.replace(this.$route.path + "/edit")
     }
   },
   mounted: function () {
@@ -199,6 +201,7 @@ export default {
   height: 30px;
   color: black;
   border-right: 3px solid rgb(228, 231, 237);
+  padding-left: 3px;
   padding-right: 26px;
   margin-right: 12px;
 }
