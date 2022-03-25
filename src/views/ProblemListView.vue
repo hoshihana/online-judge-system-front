@@ -1,27 +1,30 @@
 <template>
   <div>
-    <el-card v-loading="loading"  body-style="padding-top: 2px">
+    <el-card body-style="padding-top: 2px">
       <template #header>
-        <el-input :placeholder="placeholder" v-model="key" clearable prefix-icon="el-icon-search"
-                  style="width: 250px" @input="update" maxlength="40"></el-input>
-        <el-switch v-model="byId" active-text="按题号查询" style="margin-left: 10px" @change="update"></el-switch>
+        <el-input :placeholder="placeholder" v-model="key" clearable style="width: 250px" @input="search" maxlength="40">
+          <template #prefix>
+            &nbsp;<font-awesome-icon icon="fa-solid fa-magnifying-glass"></font-awesome-icon>
+          </template>
+        </el-input>
+        <el-switch v-model="byId" active-text="按题号查询" style="margin-left: 10px" @change="changeById"></el-switch>
       </template>
-      <el-table :data="problemEntries" stripe style="width: 100%">
+      <el-table v-loading="loading" :data="problemEntries" stripe style="width: 100%">
         <el-table-column label="题号" min-width="1">
           <template #default="scope">
-            <el-link :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
+            <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
           </template>
         </el-table-column>
         <el-table-column label="题目名" min-width="8">
           <template #default="scope">
-            <el-link :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
+            <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
           </template>
         </el-table-column>
         <el-table-column label="通过率" min-width="2" align="right">
           <template #default="scope">
             <el-tooltip effect="dark" placement="left">
               <el-tag size="small">
-                {{ scope.row.submit === 0 ? "0%" : (scope.row.submit / scope.row.accept * 100).toFixed(1) + "%" }}
+                {{ scope.row.submit === 0 ? "0%" : (scope.row.accept / scope.row.submit * 100).toFixed(1) + "%" }}
               </el-tag>
               <template #content>
                 总提交：{{ scope.row.submit }}<br/>
@@ -68,7 +71,7 @@ export default {
   },
   methods: {
     update: function () {
-      this.loading = true;
+      this.loading = true
       axios.get("/problemEntries/public/amount", {
         params: {
           "key": this.key,
@@ -95,11 +98,13 @@ export default {
         this.$message.error(error.response.data)
       })
     },
-    input: function () {
-      this.total = 0;
-      this.pageIndex = 0;
-      this.pageSize = 0;
-      this.update();
+    search: function () {
+      this.pageIndex = 1
+      this.update()
+    },
+    changeById: function () {
+      this.pageIndex = 1
+      this.update()
     },
   },
   mounted() {

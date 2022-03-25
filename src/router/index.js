@@ -4,7 +4,7 @@ import HomeView from '../views/HomeView.vue'
 import AboutView from "@/views/AboutView";
 import ProblemListView from "@/views/ProblemListView";
 import ProblemSetListView from "@/views/ProblemSetListView";
-import statusListView from "@/views/StatusListView";
+import RecordListView from "@/views/RecordListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
 import ProblemView from "@/views/ProblemView";
@@ -88,9 +88,9 @@ const routes = [
         component: ProblemSetListView
     },
     {
-        path: '/statusListView',
-        name: 'statusList',
-        component: statusListView
+        path: '/record/list',
+        name: 'recordList',
+        component: RecordListView
     },
     {
         path: '/about',

@@ -7,7 +7,6 @@
 <script>
 import {codemirror} from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'
-import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/mode/clike/clike.js'
 import 'codemirror/mode/python/python.js'
 import 'codemirror/theme/idea.css'
@@ -27,7 +26,7 @@ export default {
       newCode: "",
       options: {
         tabSize: 4,
-        mode: "text/x-c++src",
+        mode: "",
         theme: "idea",
         lineNumbers: true,
         line: true,
@@ -44,11 +43,10 @@ export default {
     },
     getMode: function (language) {
       switch (language) {
-        case "c": return "text/x-csrc"
-        case "cpp": return "text/x-c++src"
-        case "java": return "text/x-java"
-        case "py": return "text/x-python"
-        case "js": return "text/javascript"
+        case "C": return "text/x-csrc"
+        case "CPP": return "text/x-c++src"
+        case "JAVA": return "text/x-java"
+        case "PY": return "text/x-python"
         default: return ""
       }
     },

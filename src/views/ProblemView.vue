@@ -17,21 +17,26 @@
               </el-col>
             </el-row>
           </template>
-          <el-tabs tab-position="left" stretch>
-            <el-tab-pane label="题目描述">
+          <el-tabs v-model="currentTab" tab-position="left" stretch>
+            <el-tab-pane label="题目详情" name="problemDetail">
               <problem-detail :problemDetail="problemDetail"></problem-detail>
             </el-tab-pane>
-            <el-tab-pane label="代码提交">
+            <el-tab-pane label="代码提交" name="codeSubmit">
               <code-editor :code.sync="codeSubmit.code" :language="codeSubmit.language"></code-editor>
               <div style="text-align: right">
                 <el-select v-model="codeSubmit.language" placeholder="请选择代码语言" size="medium"
                            style="margin: 20px 20px 0 0; width: 200px">
+                  <template #prefix>
+                    &nbsp;<font-awesome-icon icon="fa-solid fa-code"></font-awesome-icon>
+                  </template>
                   <el-option
                       v-for="option in codeSubmit.languageOptions" :key="option.value" :label="option.label"
                       :value="option.value">
                   </el-option>
                 </el-select>
-                <el-button type="danger" size="medium" style="margin-top: 20px" plain>提交</el-button>
+                <el-button type="danger" size="medium" style="margin-top: 20px" plain @click="submitCode">
+                  <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon> 提交
+                </el-button>
               </div>
             </el-tab-pane>
           </el-tabs>
@@ -108,6 +113,8 @@ import CodeEditor from "@/components/CodeEditor";
 import ProblemDetail from "@/components/ProblemDetail";
 import axios from "@/utils/axios";
 
+//todo 查看详情可以查看代码（显示代码长度），点击用户可以跳转至用户主页...
+
 export default {
   name: "ProblemView",
   components: {ProblemDetail, CodeEditor},
@@ -116,7 +123,7 @@ export default {
     return {
       loading: false,
       authorLoading: true,
-      showProblemDetail: true,
+      currentTab: "problemDetail",
       problemDetail: {
         id: null,
         authorId: null,
@@ -134,23 +141,20 @@ export default {
         accept: null
       },
       codeSubmit: {
-        code: "#include <bits/stdc++.h>",
+        code: "",
         language: "",
         languageOptions: [{
-          value: "c",
+          value: "C",
           label: "C"
         }, {
-          value: "cpp",
+          value: "CPP",
           label: "C++"
         }, {
-          value: "java",
+          value: "JAVA",
           label: "Java"
         }, {
-          value: "py",
+          value: "PY",
           label: "Python"
-        }, {
-          value: "js",
-          label: "JavaScript"
         }]
       }
     }
@@ -185,6 +189,22 @@ export default {
     },
     editProblem: function () {
       this.$router.replace(this.$route.path + "/edit")
+    },
+    submitCode: function () {
+      this.loading = true
+      axios.post("/records", {
+        "userId": this.$root.loginStatus.userid,
+        "problemId": this.id,
+        "submitLanguage": this.codeSubmit.language,
+        "code": this.codeSubmit.code
+      }).then(() => {
+        this.loading = false
+        this.$message.success("代码提交成功")
+        this.currentTab = "problemDetail"
+      }).catch((error) => {
+        this.loading = false
+        this.$message.error(error.response.data)
+      })
     }
   },
   mounted: function () {
