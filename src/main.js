@@ -22,7 +22,10 @@ import {
     faPlus,
     faMagnifyingGlass,
     faCode,
-    faAnglesUp
+    faAnglesUp,
+    faHourglass,
+    faBookmark,
+    faRulerHorizontal,
 } from '@fortawesome/free-solid-svg-icons'
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
@@ -31,7 +34,7 @@ import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
     faXmark, faArrowRightFromBracket, faHomeUser, faAddressCard, faBarsStaggered,
     faPenToSquare, faArrowLeft, faTrashCan, faFloppyDisk, faPlus, faMagnifyingGlass,
-    faCode, faAnglesUp)
+    faCode, faAnglesUp, faHourglass, faBookmark, faRulerHorizontal)
 
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)

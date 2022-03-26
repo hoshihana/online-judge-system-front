@@ -10,12 +10,12 @@
         <el-switch v-model="byId" active-text="按题号查询" style="margin-left: 10px" @change="changeById"></el-switch>
       </template>
       <el-table v-loading="loading" :data="problemEntries" stripe style="width: 100%">
-        <el-table-column label="题号" min-width="1">
+        <el-table-column label="#" min-width="1" align="center">
           <template #default="scope">
             <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column label="题目名" min-width="8">
+        <el-table-column label="题目名" min-width="10">
           <template #default="scope">
             <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
           </template>
@@ -24,7 +24,7 @@
           <template #default="scope">
             <el-tooltip effect="dark" placement="left">
               <el-tag size="small">
-                {{ scope.row.submit === 0 ? "0%" : (scope.row.accept / scope.row.submit * 100).toFixed(1) + "%" }}
+                {{ getPercent(scope.row.accept, scope.row.submit) }}
               </el-tag>
               <template #content>
                 总提交：{{ scope.row.submit }}<br/>
@@ -67,7 +67,8 @@ export default {
   computed: {
     placeholder: function () {
       return this.byId ? "请输入题号" : "请输入题目名";
-    }
+    },
+
   },
   methods: {
     update: function () {
@@ -106,6 +107,16 @@ export default {
       this.pageIndex = 1
       this.update()
     },
+    getPercent: function (up, down) {
+      if(down === 0) {
+        return "0%"
+      }
+      if(up * 100 % down === 0) {
+        return up * 100 / down + "%"
+      } else {
+        return (up * 100 / down).toFixed(1) + "%"
+      }
+    }
   },
   mounted() {
     this.update();

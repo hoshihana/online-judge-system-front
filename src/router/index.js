@@ -14,6 +14,7 @@ import UserView from "@/views/UserView";
 import UserHomeView from "@/views/UserHomeView";
 import UserProfileView from "@/views/UserProfileView";
 import UserProblemListView from "@/views/UserProblemListView";
+import RecordView from "@/views/RecordView";
 
 Vue.use(VueRouter)
 
@@ -91,6 +92,12 @@ const routes = [
         path: '/record/list',
         name: 'recordList',
         component: RecordListView
+    },
+    {
+        path: '/record/:id',
+        name: 'record',
+        component: RecordView,
+        props: true
     },
     {
         path: '/about',

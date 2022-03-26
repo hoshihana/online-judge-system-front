@@ -1,0 +1,246 @@
+<template>
+  <div>
+    <el-card>
+      <template #header>
+        <el-row>
+          <el-col :span="12" style="text-align: left">
+            <el-button class="back-btn" type="text" @click="back"><font-awesome-icon icon="fa-solid fa-arrow-left" fixed-width></font-awesome-icon>返回</el-button>
+            <span style="vertical-align: bottom"><b style="font-size: x-large">记录 {{record.id}}</b></span>
+          </el-col>
+        </el-row>
+      </template>
+      <el-alert :type="getResultType(record.judgeResult)" show-icon :closable="false">
+        <template #title>
+          <div style="padding: 10px;font-size: x-large">{{getResult(record.judgeResult)}}</div>
+        </template>
+        <div style="padding: 10px;font-size: larger">
+          <span class="gut-span">
+            <font-awesome-icon icon="fa-solid fa-hourglass" fixed-width></font-awesome-icon>运行时间：{{ record.executeTime === null ? "--" : record.executeTime + " ms" }}
+          </span>
+          <span class="gut-span">
+            <font-awesome-icon icon="fa-solid fa-memory" fixed-width></font-awesome-icon>运行内存：{{ record.executeMemory === null ? "--" : record.executeMemory + " MB" }}
+          </span>
+          <span class="gut-span">
+            <font-awesome-icon icon="fa-solid fa-clock" fixed-width></font-awesome-icon>时间：{{record.submitTime}}
+          </span>
+          <span class="gut-span">
+            <font-awesome-icon icon="fa-solid fa-user" fixed-width></font-awesome-icon>用户：
+            <el-link type="primary" :href="'/user/' + record.userId" style="padding-bottom: 3px">{{ record.username }}</el-link>
+          </span>
+          <span class="gut-span">
+            <font-awesome-icon icon="fa-solid fa-bookmark" fixed-width></font-awesome-icon>题目：
+            <el-link type="primary" :href="'/problem/' + record.problemId" style="padding-bottom: 3px">{{ record.problemId }}</el-link>
+          </span>
+        </div>
+      </el-alert>
+      <div style="margin-top: 40px;padding: 15px">
+        <span style="padding-right: 20px">
+            <font-awesome-icon icon="fa-solid fa-code" fixed-width></font-awesome-icon> 语言：{{getLanguage(record.submitLanguage)}}
+          </span>
+        <span style="padding-right: 20px">
+            <font-awesome-icon icon="fa-solid fa-ruler-horizontal" fixed-width></font-awesome-icon>
+          代码长度：{{ record.codeLength < 1024 ? record.codeLength + " B" : (record.codeLength % 1024 === 0 ? record.codeLength / 1024 : (record.codeLength / 1024).toFixed(1)) + " KB"}}
+          </span>
+        <span><el-button type="text" class="copyBtn" title="复制" :data-clipboard-text="code" @click="copy"
+                         style="min-height: auto; padding: 0">
+          <font-awesome-icon icon="fa-regular fa-copy" color="#409EFF" fixed-width></font-awesome-icon>复制代码
+        </el-button></span>
+      </div>
+      <codemirror class="editor-border" ref="cm" v-model="code" :options="options" @input="update"></codemirror>
+    </el-card>
+  </div>
+</template>
+
+<script>
+import axios from "@/utils/axios";
+import {codemirror} from 'vue-codemirror'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/mode/clike/clike.js'
+import 'codemirror/mode/python/python.js'
+import 'codemirror/theme/idea.css'
+import 'codemirror/addon/selection/active-line'
+import 'codemirror/addon/selection/selection-pointer'
+import 'codemirror/addon/scroll/simplescrollbars.css'
+import 'codemirror/addon/scroll/simplescrollbars'
+import 'codemirror/addon/display/autorefresh'
+import Clipboard from "clipboard";
+
+
+export default {
+  name: "RecordView",
+  components: {
+    codemirror
+  },
+  props: ["id"],
+  data: function () {
+    return {
+      loading: false,
+      codeLoading: false,
+      record: { },
+      code: "",
+
+      options: {
+        tabSize: 4,
+        mode: "",
+        theme: "idea",
+        lineNumbers: true,
+        line: true,
+        styleActiveLine: true,
+        scrollbarStyle: 'overlay',
+        autoRefresh: true,
+        readOnly: true
+      }
+    }
+  },
+  methods: {
+    update: function () {
+      this.loading = this.codeLoading = true
+      axios.get("/records/" + this.id)
+          .then((response) => {
+            this.record = response.data
+            this.loading = false
+            axios.get("/records/" + this.id + "/code", {
+              params: {
+                "submitLanguage": this.record.submitLanguage,
+                "codeLength": this.record.codeLength
+              }
+            }).then((response) => {
+              this.code = response.data
+              this.codeLoading = false
+            }).catch((error) => {
+              this.codeLoading = false
+              this.$message.error(error.response.data)
+            })
+          })
+          .catch((error) => {
+            this.loading = false
+            this.$message.error(error.response.data)
+          })
+    },
+    getLanguage: function (language) {
+      switch (language) {
+        case "C":
+          return "C"
+        case "CPP":
+          return "C++"
+        case "JAVA":
+          return "Java"
+        case "PY":
+          return "Python"
+        default:
+          return language
+      }
+    },
+    getMode: function (language) {
+      switch (language) {
+        case "C": return "text/x-csrc"
+        case "CPP": return "text/x-c++src"
+        case "JAVA": return "text/x-java"
+        case "PY": return "text/x-python"
+        default: return ""
+      }
+    },
+    getResult: function (result) {
+      switch (result) {
+        case "PD":
+          return "Pending"
+        case "CE":
+          return "Compile Error"
+        case "AC":
+          return "Accepted"
+        case "WA":
+          return "Wrong Answer"
+        case "RE":
+          return "Runtime Error"
+        case "TLE":
+          return "Time Limit Exceeded"
+        case "MLE":
+          return "Memory Limit Exceeded"
+        case "SE":
+          return "System Error"
+        default:
+          return result
+      }
+    },
+    getResultType: function (result) {
+      switch (result) {
+        case "PD":
+          return "info"
+        case "AC":
+          return "success"
+        case "WA":
+        case "RE":
+        case "TLE":
+        case "MLE":
+          return "error"
+        case "CE":
+        case "SE":
+          return "warning"
+        default:
+          return ""
+      }
+    },
+    copy: function () {
+      let clipboard = new Clipboard(".copyBtn");
+      clipboard.on("success", () => {
+        this.$message({
+          message: "复制成功",
+          type: "success"
+        })
+        clipboard.destroy();
+      });
+      clipboard.on("error", () => {
+        this.$message.error("复制失败")
+        clipboard.destroy();
+      });
+    },
+    back: function () {
+      this.$router.go(-1)
+    }
+  },
+  watch: {
+    "record.submitLanguage": function (val) {
+      this.options.mode = this.getMode(val)
+    }
+  },
+  mounted : function () {
+    this.update()
+    this.$refs.cm.codemirror.setSize("auto", "auto")
+  }
+}
+</script>
+
+<style scoped>
+.back-btn {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  min-height: 35px;
+  height: 30px;
+  color: black;
+  border-right: 3px solid rgb(228, 231, 237);
+  padding-left: 3px;
+  padding-right: 24px;
+  margin-right: 12px;
+}
+
+.back-btn:hover {
+  border-right: 3px solid #409EFF;
+  color: #409EFF;
+}
+
+.back-btn:focus {
+  border-right: 3px solid #409EFF;
+  color: #409EFF;
+}
+
+.gut-span {
+  padding-right: 15px;
+}
+
+.editor-border {
+  border-width: 3px;
+  border-style: dashed dashed dashed none;
+  border-color: rgb(230,230,230);
+}
+</style>

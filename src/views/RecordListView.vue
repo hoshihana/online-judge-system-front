@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card v-loading="loading" body-style="padding-top: 2px">
+    <el-card body-style="padding-top: 2px">
       <template #header>
         <el-row :gutter="10" align="middle" type="flex">
           <el-col :span="3">
@@ -28,7 +28,7 @@
           </el-col>
           <el-col :span="3">
             <el-button type="primary" plain size="medium" @click="search">
-              <font-awesome-icon icon="fa-solid fa-magnifying-glass"></font-awesome-icon>
+              <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
               搜索
             </el-button>
           </el-col>
@@ -38,12 +38,14 @@
         </el-row>
       </template>
       <el-table v-loading="loading" ref="list" :data="records" stripe style="width: 100%" @sort-change="sortChange">
-        <el-table-column label="查看详情" align="center">
-          查看详情
+        <el-table-column label="#" align="center">
+          <template #default="scope">
+            <el-link type="primary" :href="'/record/' + scope.row.id">{{ scope.row.id }}</el-link>
+          </template>
         </el-table-column>
         <el-table-column label="用户" align="center">
           <template #default="scope">
-            {{ scope.row.username }}
+            <el-link type="primary" :href="'/user/' + scope.row.userId">{{ scope.row.username }}</el-link>
           </template>
         </el-table-column>
         <el-table-column label="时间" prop="submitTime" align="center" sortable="custom">
@@ -63,17 +65,20 @@
         </el-table-column>
         <el-table-column label="评测结果" align="center">
           <template #default="scope">
-            {{ getResult(scope.row.judgeResult) }}
+            <el-tag size="small" :type="getResultType(scope.row.judgeResult)">{{
+                getResult(scope.row.judgeResult)
+              }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="运行时间" prop="executeTime" align="center" sortable="custom">
           <template #default="scope">
-            {{ scope.row.executeTime === null ? "--" : scope.row.executeTime}}
+            {{ scope.row.executeTime === null ? "--" : scope.row.executeTime + " ms" }}
           </template>
         </el-table-column>
         <el-table-column label="运行内存" prop="executeMemory" align="center" sortable="custom">
           <template #default="scope">
-            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory }}
+            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory + " MB"}}
           </template>
         </el-table-column>
       </el-table>
@@ -218,12 +223,30 @@ export default {
           return "Runtime Error"
         case "TLE":
           return "Time Limit Exceeded"
-        case "MEL":
+        case "MLE":
           return "Memory Limit Exceeded"
         case "SE":
           return "System Error"
         default:
           return result
+      }
+    },
+    getResultType: function (result) {
+      switch (result) {
+        case "PD":
+          return "info"
+        case "AC":
+          return "success"
+        case "WA":
+        case "RE":
+        case "TLE":
+        case "MLE":
+          return "danger"
+        case "CE":
+        case "SE":
+          return "warning"
+        default:
+          return ""
       }
     },
     search: function () {
