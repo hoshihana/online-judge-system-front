@@ -11,7 +11,7 @@
           <el-dropdown-menu style="text-align: center">
             <el-dropdown-item command="home"><font-awesome-icon icon="fa-solid  fa-home-user"></font-awesome-icon> 我的主页</el-dropdown-item>
             <el-dropdown-item command="profile"><font-awesome-icon icon="fa-solid  fa-address-card"></font-awesome-icon> 个人信息</el-dropdown-item>
-            <el-dropdown-item command="problem list"><font-awesome-icon icon="fa-solid  fa-bars-staggered"></font-awesome-icon> 我的题库</el-dropdown-item>
+            <el-dropdown-item command="problem list"><font-awesome-icon icon="fa-solid  fa-book"></font-awesome-icon> 我的题库</el-dropdown-item>
             <el-dropdown-item command="logout"><font-awesome-icon icon="fa-solid  fa-arrow-right-from-bracket"></font-awesome-icon> 登出</el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -23,8 +23,6 @@
 
 <script>
 import axios from "@/utils/axios";
-
-//todo 导航栏可折叠
 
 export default {
   name: "TopBar",

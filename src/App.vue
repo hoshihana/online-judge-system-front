@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <el-container style="height: 100%;">
-      <el-aside width="150px">
+      <el-aside width="auto">
         <side-nav-bar></side-nav-bar>
       </el-aside>
       <el-container>
@@ -52,5 +52,9 @@ html, body, #app {
   /* 要在 Safari 中正常工作，需要再引入如下两行代码 */
   max-width: 100%;
   max-height: 100%;
+}
+
+router-link {
+  
 }
 </style>

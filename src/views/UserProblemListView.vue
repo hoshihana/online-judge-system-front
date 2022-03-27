@@ -4,12 +4,12 @@
       <el-table :data="problemEntries" stripe style="width: 100%">
         <el-table-column label="题号" min-width="1">
           <template #default="scope">
-            <el-link :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id">{{ scope.row.id }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="题目名" min-width="8">
           <template #default="scope">
-            <el-link :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id">{{ scope.row.name }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="总通过" min-width="1" align="center">

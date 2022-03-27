@@ -54,6 +54,9 @@ export default {
   watch: {
     language: function (val) {
       this.options.mode = this.getMode(val)
+    },
+    code: function (val) {
+      this.newCode = val
     }
   },
   mounted() {

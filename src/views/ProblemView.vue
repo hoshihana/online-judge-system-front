@@ -27,8 +27,7 @@
               <problem-detail :problemDetail="problemDetail"></problem-detail>
             </el-tab-pane>
             <el-tab-pane label="代码提交" name="codeSubmit">
-              <!--todo 显示上一次提交的代码和语言选择-->
-              <code-editor :code.sync="codeSubmit.code" :language="codeSubmit.language"></code-editor>
+              <code-editor v-loading="codeSubmitLoading" :code.sync="codeSubmit.code" :language="codeSubmit.language"></code-editor>
               <div style="text-align: right">
                 <el-select v-model="codeSubmit.language" placeholder="请选择代码语言" size="medium"
                            style="margin: 20px 20px 0 0; width: 200px">
@@ -61,8 +60,7 @@
                 作者</b>
             </el-col>
             <el-col :span="14" style="text-align: right">
-              <el-link type="primary" :href="'/user/' + problemDetail.authorUsername" target="_blank">{{ authorUsername }}
-              </el-link>
+              <router-link class="el-link el-link--primary" :to="'/user/' + problemDetail.authorId" target="_blank">{{ authorUsername }}</router-link>
             </el-col>
           </el-row>
           <el-divider class="horizontal-divider"></el-divider>
@@ -107,7 +105,8 @@
             </el-col>
           </el-row>
         </el-card>
-        <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 10px 7px'}">
+        <!--历史提交定时刷新-->
+        <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 10px 15px'}">
           <template #header>
             <el-row align="middle" type="flex">
               <el-col :span="8" style="text-align: left">
@@ -132,10 +131,10 @@
               </el-col>
             </el-row>
           </template>
-          <el-table v-loading="submitLoading" :data="records" stripe style="width: 100%" size="medium">
+          <el-table v-loading="historySubmitLoading" :data="records" stripe style="width: 100%" size="medium">
             <el-table-column label="#" align="center" min-width="1">
               <template #default="scope">
-                <el-link type="primary" :href="'/record/' + scope.row.id">{{ scope.row.id }}</el-link>
+                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id">{{ scope.row.id }}</router-link>
               </template>
             </el-table-column>
             <el-table-column label="时间" align="center" min-width="2">
@@ -154,10 +153,10 @@
                 </el-tooltip>
               </template>
             </el-table-column>
-            <div>
-              <!--todo编写查看更多功能-->
-            </div>
           </el-table>
+          <div v-if="submit > limit" style="padding-top: 5px;text-align: center">
+            <router-link class="el-link el-link--primary" :to="'/record/list?problemId=' + problemDetail.id + '&onlySelf=true'" target="_blank">查看更多</router-link>
+          </div>
         </el-card>
       </el-aside>
     </el-container>
@@ -176,12 +175,13 @@ export default {
   data: function () {
     return {
       loading: false,
-      submitLoading: false,
+      historySubmitLoading: false,
+      codeSubmitLoading: false,
       currentTab: "problemDetail",
 
       submit: "--",
       accept: "--",
-      limit: 5,
+      limit: 3,
       records: [],
 
       authorUsername: "--",
@@ -247,6 +247,7 @@ export default {
             }).catch((error) => {
               this.$message.error(error.response.data)
             })
+            // 异步获取用户在该题的提交和通过次数
             axios.get("/problems/" + this.problemDetail.id + "/users/" + this.$root.loginStatus.userid)
               .then((response) => {
                 this.submit = response.data.submit || 0
@@ -254,7 +255,8 @@ export default {
               }).catch((error) => {
                 this.$message.error(error.response.data)
             })
-            this.submitLoading = true
+            // 异步获取用户在该题的最近的提交记录
+            this.historySubmitLoading = true
             axios.get("/records/recent", {
               params: {
                 "problemId": this.problemDetail.id,
@@ -262,13 +264,29 @@ export default {
                 "limit": this.limit
               }
             }).then((response) => {
-              this.submitLoading = false
+              this.historySubmitLoading = false
               this.records = response.data
+              if(this.records.length > 0) {
+                this.codeSubmit.language = this.records[0].submitLanguage
+                this.codeSubmitLoading = true
+                axios.get("/records/" + this.records[0].id + "/code", {
+                  params: {
+                    "submitLanguage": this.records[0].submitLanguage,
+                    "codeLength": this.records[0].codeLength
+                  }
+                }).then((response) => {
+                  this.codeSubmit.code = response.data
+                  this.codeSubmitLoading = false
+                }).catch((error) => {
+                  this.codeSubmitLoading = false
+                  this.$message.error(error.response.data)
+                })
+              }
             }).catch((error) => {
-              this.submitLoading = false
+              this.historySubmitLoading = false
               this.$message.error(error.response.data)
             })
-
+            // 异步获取用户在该题最近一次提交的代码
           })
           .catch((error) => {
             this.loading = false

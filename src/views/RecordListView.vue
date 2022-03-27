@@ -40,12 +40,12 @@
       <el-table v-loading="loading" ref="list" :data="records" stripe style="width: 100%" @sort-change="sortChange">
         <el-table-column label="#" align="center">
           <template #default="scope">
-            <el-link type="primary" :href="'/record/' + scope.row.id">{{ scope.row.id }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id">{{ scope.row.id }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="用户" align="center">
           <template #default="scope">
-            <el-link type="primary" :href="'/user/' + scope.row.userId">{{ scope.row.username }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/user/' + scope.row.userId" target="_blank">{{ scope.row.username }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="时间" prop="submitTime" align="center" sortable="custom">
@@ -55,7 +55,7 @@
         </el-table-column>
         <el-table-column label="题目" align="center">
           <template #default="scope">
-            <el-link type="primary" :href="'/problem/' + scope.row.problemId">{{ scope.row.problemId }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.problemId">{{ scope.row.problemId }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="语言" align="center">
@@ -97,8 +97,11 @@
 <script>
 import axios from "@/utils/axios";
 
+//todo 添加刷新按钮
+
 export default {
   name: "RecordView",
+  props: ["initProblemId", "initOnlySelf"],
   data: function () {
     return {
       loading: false,
@@ -275,6 +278,12 @@ export default {
     }
   },
   mounted: function () {
+    if (this.initProblemId !== undefined)
+      this.problemId = this.initProblemId
+    if (this.initOnlySelf === "true") {
+      this.disableUsername = true
+      this.onlySelf = true
+    }
     this.update()
   }
 }

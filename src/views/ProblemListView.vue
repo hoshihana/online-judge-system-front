@@ -12,12 +12,12 @@
       <el-table v-loading="loading" :data="problemEntries" stripe style="width: 100%">
         <el-table-column label="#" min-width="1" align="center">
           <template #default="scope">
-            <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.id }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id">{{ scope.row.id }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="题目名" min-width="10">
           <template #default="scope">
-            <el-link type="primary" :href="'/problem/' + scope.row.id">{{ scope.row.name }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id">{{ scope.row.name }}</router-link>
           </template>
         </el-table-column>
         <el-table-column label="通过率" min-width="2" align="right">

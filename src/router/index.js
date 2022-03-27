@@ -91,7 +91,8 @@ const routes = [
     {
         path: '/record/list',
         name: 'recordList',
-        component: RecordListView
+        component: RecordListView,
+        props: route => ({ initProblemId: route.query.problemId, initOnlySelf: route.query.onlySelf })
     },
     {
         path: '/record/:id',

@@ -25,11 +25,11 @@
           </span>
           <span class="gut-span">
             <font-awesome-icon icon="fa-solid fa-user" fixed-width></font-awesome-icon>用户：
-            <el-link type="primary" :href="'/user/' + record.userId" style="padding-bottom: 3px">{{ record.username }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/user/' + record.userId" style="padding-bottom: 3px" target="_blank">{{ record.username }}</router-link>
           </span>
           <span class="gut-span">
             <font-awesome-icon icon="fa-solid fa-bookmark" fixed-width></font-awesome-icon>题目：
-            <el-link type="primary" :href="'/problem/' + record.problemId" style="padding-bottom: 3px">{{ record.problemId }}</el-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + record.problemId" style="padding-bottom: 3px">{{ record.problemId }}</router-link>
           </span>
         </div>
       </el-alert>
