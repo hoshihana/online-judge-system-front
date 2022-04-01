@@ -55,6 +55,6 @@ html, body, #app {
 }
 
 router-link {
-  
+
 }
 </style>

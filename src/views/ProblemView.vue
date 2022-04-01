@@ -13,12 +13,16 @@
                 <span style="vertical-align: bottom"><b
                     style="font-size: x-large">{{ problemDetail.id + ' ' + problemDetail.name }}</b></span>
               </el-col>
-              <el-col :span="12" style="text-align: right">
-                <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium" plain
-                           @click="editProblem">
-                  <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
-                  编辑题目
-                </el-button>
+              <el-col :span="12" style="text-align: right; float: right">
+                <el-tooltip content="测试点尚未配置" placement="left" effect="light" :disabled="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
+                  <el-badge is-dot :hidden="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
+                    <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium" plain
+                               @click="editProblem">
+                      <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
+                      编辑题目
+                    </el-button>
+                  </el-badge>
+                </el-tooltip>
               </el-col>
             </el-row>
           </template>
@@ -198,6 +202,7 @@ export default {
         explanation: "",
         timeLimit: null,
         memoryLimit: null,
+        testSet: null,
         visibility: null,
         samples: "",
         submit: null,

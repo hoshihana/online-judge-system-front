@@ -5,7 +5,8 @@
         <el-row v-if="!existent">
           <el-col :span="8" style="text-align: left">
             <el-button type="primary" size="medium" plain @click="backToUserProblemList">
-              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon> 返回我的题库
+              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
+              返回我的题库
             </el-button>
           </el-col>
           <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目创建</b></el-col>
@@ -13,17 +14,23 @@
         <el-row v-else>
           <el-col :span="8" style="text-align: left">
             <el-button type="primary" size="medium" plain @click="backToProblem">
-              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon> 返回题目
+              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
+              返回题目
             </el-button>
             <el-button type="danger" size="medium" plain @click="deleteProblem">
-              <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon> 删除题目
+              <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon>
+              删除题目
+              <!--todo 删除确认弹窗-->
             </el-button>
           </el-col>
-          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目编辑：{{id + " " + name}}</b></el-col>
+          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目编辑：{{ id + " " + name }}</b>
+          </el-col>
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch>
         <el-tab-pane label="题目编辑">
+          <el-alert v-if="!existent" style="margin: 10px;width: 350px" title="请保存当前内容后再进行测试点的配置" type="warning"
+                    show-icon close-text="知道了"></el-alert>
           <h3>题目名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
                     style="width: 80%; margin: 15px"></el-input>
@@ -62,12 +69,132 @@
           <mavon-editor v-model="explanation" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
           <div style="text-align: right">
             <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
-              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon> 保存
+              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
+              保存
             </el-button>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="数据点配置">
-          <!--数据点配置-->
+        <el-tab-pane label="测试点配置" :disabled="!existent">
+          <h3>时间限制<b style="color: #F56C6C">*</b>
+            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大运行时间限制，范围限制：500ms~20000ms" placement="right">
+              <font-awesome-icon icon="fa-solid fa-circle-question" size="xs" color="#7F7F7F"></font-awesome-icon>
+            </el-tooltip>
+          </h3>
+          <div style="margin: 15px 15px 25px">
+            <el-input-number v-model="timeLimit"
+                             controls-position="right"
+                             size="medium"
+                             :min="500"
+                             :max="20000"
+                             :step="100"
+                             style="width: 150px"
+                             step-strictly></el-input-number>
+            ms
+          </div>
+          <h3>内存限制<b style="color: #F56C6C">*</b>
+            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大内存使用限制，范围限制：128MB~1024MB" placement="right">
+              <font-awesome-icon icon="fa-solid fa-circle-question" size="xs" color="#7F7F7F"></font-awesome-icon>
+            </el-tooltip>
+          </h3>
+          <div style="margin: 15px 15px 25px">
+            <el-input-number v-model="memoryLimit"
+                             controls-position="right"
+                             size="medium"
+                             :min="128"
+                             :max="1024"
+                             :step="1"
+                             style="width: 150px"
+                             step-strictly></el-input-number>
+            MB
+          </div>
+          <h3>测试点</h3>
+          <div style="margin: 15px 15px 25px;">
+            <el-alert
+                type="warning"
+                :closable="false"
+                style="margin-bottom: 20px; width: 700px">
+              <template #title>
+                <span style="font-size: larger"><i class="el-icon-warning"></i> 测试点上传要求</span>
+              </template>
+              <ul style="padding-left: 10px; font-size: larger;">
+                <li>需将所有的测试点打包为zip压缩文件后进行上传，不接受其他格式</li>
+                <li>对于每一组测试点文件，必须成对出现，输入文件后缀应为<code>.in</code>，输出文件后缀应为<code>.out</code></li>
+                <li>
+                  测试点文件应当从1开始按序号进行命名，即第一组为<code>1.in</code>和<code>1.out</code>、第二组为<code>2.in</code>和<code>2.out</code>，以此类推
+                </li>
+                <li>测试点文件组数不得超过32组，不能含有其他多余文件，且打包后的zip压缩文件大小不能超过50MB</li>
+              </ul>
+            </el-alert>
+            <el-row>
+              <el-col :span="7">
+                <el-upload :action="uploadUrl" drag :multiple="false" :with-credentials="true" :show-file-list="false"
+                           :before-upload="beforeUpload"
+                           :on-success="onUploadSuccess"
+                           :on-error="onUploadError">
+                  <i class="el-icon-upload"></i>
+                  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                  <template #tip>
+                    <div class="el-upload__tip">只能上传zip文件，且不超过30MB，将会替换原测试点文件</div>
+                  </template>
+                </el-upload>
+              </el-col>
+              <el-col :span="4" style="text-align: center; margin-top: 80px">
+                <font-awesome-icon icon="fa-solid fa-angles-right" size="3x" color="rgb(192,196,204)" fixed-width
+                                   :fade="uploadLoading"></font-awesome-icon>
+              </el-col>
+              <el-col :span="13">
+                <el-descriptions v-loading="testInfoLoading" title="测试点信息" :column="3" border>
+                  <template slot="extra">
+                    <el-button type="primary" size="medium" plain :disabled="!testSet" @click="downloadTestFile">
+                      <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"></font-awesome-icon>
+                      下载测试点文件
+                    </el-button>
+                  </template>
+                  <el-descriptions-item>
+                    <template slot="label">
+                      <font-awesome-icon icon="fa-solid fa-book" fixed-width></font-awesome-icon>
+                      题号
+                    </template>
+                    {{ testInfo.problemId }}
+                  </el-descriptions-item>
+                  <el-descriptions-item>
+                    <template slot="label">
+                      <font-awesome-icon icon="fa-solid fa-file-zipper" fixed-width></font-awesome-icon>
+                      文件名
+                    </template>
+                    {{ testInfo.fileName }}
+                  </el-descriptions-item>
+                  <el-descriptions-item>
+                    <template slot="label">
+                      <font-awesome-icon icon="fa-solid fa-hashtag" fixed-width></font-awesome-icon>
+                      测试点组数
+                    </template>
+                    {{ testInfo.testAmount }}
+                  </el-descriptions-item>
+                  <el-descriptions-item>
+                    <template slot="label">
+                      <font-awesome-icon icon="fa-solid fa-box" fixed-width></font-awesome-icon>
+                      文件大小
+                    </template>
+                    {{ getTestSize() }}
+                  </el-descriptions-item>
+                  <el-descriptions-item>
+                    <template slot="label">
+                      <font-awesome-icon icon="fa-solid fa-clock" fixed-width></font-awesome-icon>
+                      上传时间
+                    </template>
+                    {{ testInfo.lastModified }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </el-col>
+            </el-row>
+          </div>
+          <div style="text-align: right">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
+              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
+              保存
+            </el-button>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -78,6 +205,7 @@
 import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
+import JSZip from "jszip"
 import router from "@/router";
 
 export default {
@@ -89,8 +217,11 @@ export default {
   data: function () {
     return {
       loading: false,
+      uploadLoading: false,
+      testInfoLoading: false,
       saved: false,
       existent: false,
+      currentTab: "problemEdit",
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -132,14 +263,23 @@ export default {
       inputFormat: "",
       outputFormat: "",
       explanation: "",
-      timeLimit: 1000,
+      timeLimit: 500,
       memoryLimit: 128,
       visibility: null,
       samples: [],
+      uploadUrl: "",
+      testSet: false,
+      testInfo: {
+        problemId: "--",
+        fileName: "--",
+        length: "--",
+        testAmount: "--",
+        lastModified: "--"
+      },
     }
   },
   beforeRouteEnter: function (to, from, next) {
-    if(to.fullPath === "/problem/new") {
+    if (to.fullPath === "/problem/new") {
       next()
     } else {
       axios.get("/problems/" + to.params.id + "/authorId")
@@ -173,9 +313,11 @@ export default {
     }
   },
   mounted: function () {
-    if(this.$route.fullPath === "/problem/new") {
+    if (this.$route.fullPath === "/problem/new") {
       this.existent = false
     } else {
+      // todo 部署时修改该url
+      this.uploadUrl = "http://localhost:8088/problems/" + this.id + "/test"
       this.existent = true
       this.loading = true
       axios.get("/problems/" + this.id)
@@ -194,6 +336,19 @@ export default {
           .catch((error) => {
             this.loading = false
             this.$message.error(error.response.data)
+          })
+      this.testInfoLoading = true
+      axios.get("/problems/" + this.id + "/testInfo")
+          .then((response) => {
+            this.testInfo = response.data
+            this.testSet = true
+            this.testInfoLoading = false
+          })
+          .catch((error) => {
+            if (error.response.status !== 404) {
+              this.$message.error(error.response.data)
+            }
+            this.testInfoLoading = false
           })
     }
   },
@@ -226,8 +381,8 @@ export default {
           "outputFormat": this.outputFormat,
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
-          "timeLimit": 500,   //todo 待传入数据（注意要传入整数，不能是字符串，否则后端报错）
-          "memoryLimit": 128
+          "timeLimit": this.timeLimit,
+          "memoryLimit": this.memoryLimit
         }).then((response) => {
           this.loading = false
           this.$message({
@@ -254,8 +409,8 @@ export default {
           "outputFormat": this.outputFormat,
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
-          "timeLimit": 500,   //todo 待传入数据（注意要传入整数，不能是字符串，否则后端报错）
-          "memoryLimit": 128,
+          "timeLimit": this.timeLimit,
+          "memoryLimit": this.memoryLimit
         }).then((response) => {
           this.loading = false
           this.$message({
@@ -298,6 +453,102 @@ export default {
     },
     backToUserProblemList: function () {
       this.$router.replace("/user/" + this.$root.loginStatus.userid + "/problem/list")
+    },
+    getTestSize: function () {
+      if (this.testInfo.length === "--") {
+        return "--"
+      } else {
+        let length = this.testInfo.length
+        if (length < 1024) {
+          return length + " B"
+        } else if (length < 1024 * 1024) {
+          return (length / 1024).toFixed(1) + " KB"
+        } else {
+          return (length / (1024 * 1024)).toFixed(1) + " MB"
+        }
+      }
+    },
+    beforeUpload: async function (file) {
+      this.uploadLoading = true
+      if (this.testSet) {
+        let cancel = true;
+        await this.$confirm('上传后将会替换原测试点文件, 是否继续上传?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          cancel = false
+        }).catch(() => {
+          cancel = true
+        })
+        if (cancel) {
+          this.uploadLoading = false
+          throw new Error("用户取消上传")
+        }
+      }
+      if (file.size > 30 * 1024 * 1024) {
+        this.$message.error("上传的zip压缩文件超过了30MB，请严格遵循上传要求")
+        this.uploadLoading = false
+        throw new Error("上传文件超出30MB限制")
+      }
+      let valid = true;
+      await JSZip.loadAsync(file)
+          .then(function (zip) {
+            let cur = 0
+            zip.forEach(function (relativePath, zipEntry) {
+              if (valid) {
+                cur++
+                if (cur > 32) {
+                  valid = false
+                }
+                if (cur % 2 === 1) {
+                  if (zipEntry.name !== (cur + 1) / 2 + ".in") {
+                    valid = false
+                  }
+                } else {
+                  if (zipEntry.name !== cur / 2 + ".out") {
+                    valid = false
+                  }
+                }
+              }
+            })
+            if(cur % 2 === 1) {
+              valid = false
+            }
+          }, function () {
+            valid = false
+          });
+      if (!valid) {
+        this.$message.error("测试点文件内部格式不正确，请严格遵循上传要求")
+        this.uploadLoading = false
+        throw new Error("文件内部格式不合要求")
+      }
+    },
+    onUploadSuccess: function (response) {
+      this.testInfo = response
+      this.$message.success("测试点文件上传成功")
+      this.uploadLoading = false
+      this.testSet = true
+    },
+    onUploadError: function (err) {
+      this.$message.error(err)
+      this.uploadLoading = false
+    },
+    downloadTestFile: function () {
+      axios.get("/problems/" + this.id + "/test", {responseType: "blob"})
+        .then((response) => {
+          const blob = new Blob([response.data], {type: 'application/x-zip-compressed;charset=utf-8'});
+          const href = window.URL.createObjectURL(blob);
+          let filename = this.id + ".zip";
+          const downloadElement = document.createElement('a');
+          downloadElement.style.display = 'none';
+          downloadElement.href = href;
+          downloadElement.download = filename ;
+          document.body.appendChild(downloadElement);
+          downloadElement.click();
+          document.body.removeChild(downloadElement);
+          window.URL.revokeObjectURL(href);
+        })
     }
   }
 }
@@ -322,6 +573,14 @@ export default {
 
 .close-btn:hover {
   color: #1776f1;
+}
+
+::v-deep .el-upload {
+  width: 100%;
+}
+
+::v-deep .el-upload-dragger {
+  width: 100%;
 }
 
 h3 {
