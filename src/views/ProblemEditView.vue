@@ -76,7 +76,7 @@
         </el-tab-pane>
         <el-tab-pane label="测试点配置" :disabled="!existent">
           <h3>时间限制<b style="color: #F56C6C">*</b>
-            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大运行时间限制，范围限制：500ms~20000ms" placement="right">
+            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大运行时间限制，范围限制：500ms~15000ms" placement="right">
               <font-awesome-icon icon="fa-solid fa-circle-question" size="xs" color="#7F7F7F"></font-awesome-icon>
             </el-tooltip>
           </h3>
@@ -85,14 +85,14 @@
                              controls-position="right"
                              size="medium"
                              :min="500"
-                             :max="20000"
+                             :max="15000"
                              :step="100"
                              style="width: 150px"
                              step-strictly></el-input-number>
             ms
           </div>
           <h3>内存限制<b style="color: #F56C6C">*</b>
-            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大内存使用限制，范围限制：128MB~1024MB" placement="right">
+            &nbsp;<el-tooltip effect="dark" content="每个测试点的最大内存使用限制，范围限制：128MB~512MB" placement="right">
               <font-awesome-icon icon="fa-solid fa-circle-question" size="xs" color="#7F7F7F"></font-awesome-icon>
             </el-tooltip>
           </h3>
@@ -101,7 +101,7 @@
                              controls-position="right"
                              size="medium"
                              :min="128"
-                             :max="1024"
+                             :max="512"
                              :step="1"
                              style="width: 150px"
                              step-strictly></el-input-number>
