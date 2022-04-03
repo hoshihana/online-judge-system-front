@@ -47,6 +47,7 @@
                   <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon>
                   提交
                 </el-button>
+                <!--未配置数据点的题目不允许提交代码-->
               </div>
             </el-tab-pane>
           </el-tabs>

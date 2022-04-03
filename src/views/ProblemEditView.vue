@@ -122,12 +122,12 @@
                 <li>
                   测试点文件应当从1开始按序号进行命名，即第一组为<code>1.in</code>和<code>1.out</code>、第二组为<code>2.in</code>和<code>2.out</code>，以此类推
                 </li>
-                <li>测试点文件组数不得超过32组，不能含有其他多余文件，且打包后的zip压缩文件大小不能超过50MB</li>
+                <li>测试点文件组数不得超过20组，不能含有其他多余文件，且打包后的zip压缩文件大小不能超过30MB，同时建议单个输出不要超过2MB</li>
               </ul>
             </el-alert>
             <el-row>
               <el-col :span="7">
-                <el-upload :action="uploadUrl" drag :multiple="false" :with-credentials="true" :show-file-list="false"
+                <el-upload :action="uploadUrl" drag :multiple="false" :with-credentials="true" :show-file-list="false" accept=".zip"
                            :before-upload="beforeUpload"
                            :on-success="onUploadSuccess"
                            :on-error="onUploadError">
@@ -498,7 +498,7 @@ export default {
             zip.forEach(function (relativePath, zipEntry) {
               if (valid) {
                 cur++
-                if (cur > 32) {
+                if (cur > 40) {
                   valid = false
                 }
                 if (cur % 2 === 1) {
