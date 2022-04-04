@@ -212,6 +212,7 @@ export default {
           return language
       }
     },
+    // todo 配置JD状态
     getResult: function (result) {
       switch (result) {
         case "PD":

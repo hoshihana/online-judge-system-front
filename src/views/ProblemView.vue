@@ -306,6 +306,13 @@ export default {
       this.$router.replace(this.$route.path + "/edit")
     },
     submitCode: function () {
+      if(this.codeSubmit.language === ""){
+        this.$message.error("请选择提交语言")
+        return
+      } else if(this.codeSubmit.code === "") {
+        this.$message.error("提交代码不能为空")
+        return
+      }
       this.loading = true
       axios.post("/records", {
         "userId": this.$root.loginStatus.userid,
