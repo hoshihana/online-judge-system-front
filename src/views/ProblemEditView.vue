@@ -512,7 +512,7 @@ export default {
                 }
               }
             })
-            if(cur % 2 === 1) {
+            if(cur === 0 || cur % 2 === 1) {
               valid = false
             }
           }, function () {

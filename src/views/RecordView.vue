@@ -4,42 +4,55 @@
       <template #header>
         <el-row>
           <el-col :span="12" style="text-align: left">
-            <el-button class="back-btn" type="text" @click="back"><font-awesome-icon icon="fa-solid fa-arrow-left" fixed-width></font-awesome-icon>返回</el-button>
-            <span style="vertical-align: bottom"><b style="font-size: x-large">记录 {{record.id}}</b></span>
+            <el-button class="back-btn" type="text" @click="back">
+              <font-awesome-icon icon="fa-solid fa-arrow-left" fixed-width></font-awesome-icon>
+              返回
+            </el-button>
+            <span style="vertical-align: bottom"><b style="font-size: x-large">记录 {{ record.id }}</b></span>
           </el-col>
         </el-row>
       </template>
       <el-alert :type="getResultType(record.judgeResult)" show-icon :closable="false">
         <template #title>
-          <div style="padding: 10px;font-size: x-large">{{getResult(record.judgeResult)}}</div>
+          <div style="padding: 10px;font-size: x-large">
+            {{ getResult(record.judgeResult) }} <i v-if="record.judgeResult === 'PD' || record.judgeResult === 'JD'"
+                                                   class="el-icon-loading"></i>
+          </div>
         </template>
         <div style="padding: 10px;font-size: larger">
           <span class="gut-span">
-            <font-awesome-icon icon="fa-solid fa-hourglass" fixed-width></font-awesome-icon>运行时间：{{ record.executeTime === null ? "--" : record.executeTime + " ms" }}
+            <font-awesome-icon icon="fa-solid fa-hourglass" fixed-width></font-awesome-icon>运行时间：{{
+              record.executeTime === null ? "--" : record.executeTime + " ms"
+            }}
           </span>
           <span class="gut-span">
-            <font-awesome-icon icon="fa-solid fa-memory" fixed-width></font-awesome-icon>运行内存：{{ record.executeMemory === null ? "--" : record.executeMemory + " MB" }}
+            <font-awesome-icon icon="fa-solid fa-memory" fixed-width></font-awesome-icon>运行内存：{{
+              record.executeMemory === null ? "--" : record.executeMemory + " KB"
+            }}
           </span>
           <span class="gut-span">
-            <font-awesome-icon icon="fa-solid fa-clock" fixed-width></font-awesome-icon>时间：{{record.submitTime}}
+            <font-awesome-icon icon="fa-solid fa-clock" fixed-width></font-awesome-icon>时间：{{ record.submitTime }}
           </span>
           <span class="gut-span">
             <font-awesome-icon icon="fa-solid fa-user" fixed-width></font-awesome-icon>用户：
-            <router-link class="el-link el-link--primary" :to="'/user/' + record.userId" style="padding-bottom: 3px" target="_blank">{{ record.username }}</router-link>
+            <router-link class="el-link el-link--primary" :to="'/user/' + record.userId" style="padding-bottom: 3px"
+                         target="_blank">{{ record.username }}</router-link>
           </span>
           <span class="gut-span">
             <font-awesome-icon icon="fa-solid fa-bookmark" fixed-width></font-awesome-icon>题目：
-            <router-link class="el-link el-link--primary" :to="'/problem/' + record.problemId" style="padding-bottom: 3px">{{ record.problemId }}</router-link>
+            <router-link class="el-link el-link--primary" :to="'/problem/' + record.problemId"
+                         style="padding-bottom: 3px">{{ record.problemId }}</router-link>
           </span>
         </div>
       </el-alert>
       <div style="margin-top: 40px;padding: 15px">
         <span style="padding-right: 20px">
-            <font-awesome-icon icon="fa-solid fa-code" fixed-width></font-awesome-icon> 语言：{{getLanguage(record.submitLanguage)}}
+            <font-awesome-icon icon="fa-solid fa-code"
+                               fixed-width></font-awesome-icon> 语言：{{ getLanguage(record.submitLanguage) }}
           </span>
         <span style="padding-right: 20px">
             <font-awesome-icon icon="fa-solid fa-ruler-horizontal" fixed-width></font-awesome-icon>
-          代码长度：{{ record.codeLength < 1024 ? record.codeLength + " B" : (record.codeLength % 1024 === 0 ? record.codeLength / 1024 : (record.codeLength / 1024).toFixed(1)) + " KB"}}
+          代码长度：{{ record.codeLength < 1024 ? record.codeLength + " B" : (record.codeLength % 1024 === 0 ? record.codeLength / 1024 : (record.codeLength / 1024).toFixed(1)) + " KB" }}
           </span>
         <span><el-button type="text" class="copyBtn" title="复制" :data-clipboard-text="code" @click="copy"
                          style="min-height: auto; padding: 0">
@@ -64,7 +77,7 @@ import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars'
 import 'codemirror/addon/display/autorefresh'
 import Clipboard from "clipboard";
-
+// todo 显示编译信息
 
 export default {
   name: "RecordView",
@@ -76,7 +89,7 @@ export default {
     return {
       loading: false,
       codeLoading: false,
-      record: { },
+      record: {},
       code: "",
 
       options: {
@@ -123,27 +136,46 @@ export default {
           return "C"
         case "CPP":
           return "C++"
+        case "CPP11":
+          return "C++11"
+        case "CPP14":
+          return "C++14"
+        case "CPP17":
+          return "C++17"
         case "JAVA":
           return "Java"
-        case "PY":
-          return "Python"
+        case "PY2":
+          return "Python2"
+        case "PY3":
+          return "Python3"
         default:
           return language
       }
     },
     getMode: function (language) {
       switch (language) {
-        case "C": return "text/x-csrc"
-        case "CPP": return "text/x-c++src"
-        case "JAVA": return "text/x-java"
-        case "PY": return "text/x-python"
-        default: return ""
+        case "C":
+          return "text/x-csrc"
+        case "CPP":
+        case "CPP11":
+        case "CPP14":
+        case "CPP17":
+          return "text/x-c++src"
+        case "JAVA":
+          return "text/x-java"
+        case "PY2":
+        case "PY3":
+          return "text/x-python"
+        default:
+          return ""
       }
     },
     getResult: function (result) {
       switch (result) {
         case "PD":
           return "Pending"
+        case "JD":
+          return "Judging"
         case "CE":
           return "Compile Error"
         case "AC":
@@ -162,10 +194,10 @@ export default {
           return result
       }
     },
-    // todo 配置JD状态
     getResultType: function (result) {
       switch (result) {
         case "PD":
+        case "JD":
           return "info"
         case "AC":
           return "success"
@@ -204,9 +236,19 @@ export default {
       this.options.mode = this.getMode(val)
     }
   },
-  mounted : function () {
+  mounted: function () {
     this.update()
     this.$refs.cm.codemirror.setSize("auto", "auto")
+    const timer = setInterval(() => {
+      if (this.record.judgeResult !== undefined && (this.record.judgeResult === 'PD' || this.record.judgeResult === 'JD')) {
+        axios.get("/records/" + this.id).then((response) => {
+          this.record = response.data
+        })
+      }
+    }, 500)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer);
+    })
   }
 }
 </script>
@@ -242,6 +284,6 @@ export default {
 .editor-border {
   border-width: 3px;
   border-style: dashed dashed dashed none;
-  border-color: rgb(230,230,230);
+  border-color: rgb(230, 230, 230);
 }
 </style>

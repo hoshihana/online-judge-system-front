@@ -27,13 +27,16 @@
             </el-select>
           </el-col>
           <el-col :span="3">
-            <el-button type="primary" plain size="medium" @click="search">
+            <el-button type="primary" plain size="medium" @click="search" :disabled="loading">
               <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
               搜索
             </el-button>
           </el-col>
           <el-col :span="8" style="text-align: right">
-            <el-switch v-model="onlySelf" active-text="仅显示我的记录" @change="changeOnlySelf"></el-switch>
+            <el-button type="text" @click="update" style="margin-right: 20px" :disabled="loading">
+              <font-awesome-icon icon="fa-solid fa-arrows-rotate" fixed-width></font-awesome-icon> 刷新
+            </el-button>
+            <el-switch v-model="onlySelf" active-text="仅显示我的记录" @change="changeOnlySelf" :disabled="loading"></el-switch>
           </el-col>
         </el-row>
       </template>
@@ -67,7 +70,7 @@
           <template #default="scope">
             <el-tag size="small" :type="getResultType(scope.row.judgeResult)">{{
                 getResult(scope.row.judgeResult)
-              }}
+              }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'" class="el-icon-loading"></i>
             </el-tag>
           </template>
         </el-table-column>
@@ -78,7 +81,7 @@
         </el-table-column>
         <el-table-column label="运行内存" prop="executeMemory" align="center" sortable="custom">
           <template #default="scope">
-            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory + " MB"}}
+            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory + " KB"}}
           </template>
         </el-table-column>
       </el-table>
@@ -97,8 +100,7 @@
 <script>
 import axios from "@/utils/axios";
 
-//todo 添加刷新按钮
-
+// todo 该页面及题目的最近提交，点击评测结果tag后能够跳转至record页面
 export default {
   name: "RecordView",
   props: ["initProblemId", "initOnlySelf"],
@@ -127,11 +129,23 @@ export default {
         value: "CPP",
         label: "C++"
       }, {
+        value: "CPP11",
+        label: "C++11"
+      }, {
+        value: "CPP14",
+        label: "C++14"
+      }, {
+        value: "CPP17",
+        label: "C++17"
+      }, {
         value: "JAVA",
         label: "Java"
       }, {
-        value: "PY",
-        label: "Python"
+        value: "PY2",
+        label: "Python2"
+      }, {
+        value: "PY3",
+        label: "Python3"
       }],
 
       resultOptions: [{
@@ -204,19 +218,28 @@ export default {
           return "C"
         case "CPP":
           return "C++"
+        case "CPP11":
+          return "C++11"
+        case "CPP14":
+          return "C++14"
+        case "CPP17":
+          return "C++17"
         case "JAVA":
           return "Java"
-        case "PY":
-          return "Python"
+        case "PY2":
+          return "Python2"
+        case "PY3":
+          return "Python3"
         default:
           return language
       }
     },
-    // todo 配置JD状态
     getResult: function (result) {
       switch (result) {
         case "PD":
           return "Pending"
+        case "JD":
+          return "Judging"
         case "CE":
           return "Compile Error"
         case "AC":
@@ -238,6 +261,7 @@ export default {
     getResultType: function (result) {
       switch (result) {
         case "PD":
+        case "JD":
           return "info"
         case "AC":
           return "success"

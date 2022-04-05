@@ -14,9 +14,12 @@
                     style="font-size: x-large">{{ problemDetail.id + ' ' + problemDetail.name }}</b></span>
               </el-col>
               <el-col :span="12" style="text-align: right; float: right">
-                <el-tooltip content="测试点尚未配置" placement="left" effect="light" :disabled="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
-                  <el-badge is-dot :hidden="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
-                    <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium" plain
+                <el-tooltip content="测试点尚未配置" placement="left" effect="light"
+                            :disabled="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
+                  <el-badge is-dot
+                            :hidden="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
+                    <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium"
+                               plain
                                @click="editProblem">
                       <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
                       编辑题目
@@ -30,8 +33,9 @@
             <el-tab-pane label="题目详情" name="problemDetail">
               <problem-detail :problemDetail="problemDetail"></problem-detail>
             </el-tab-pane>
-            <el-tab-pane label="代码提交" name="codeSubmit">
-              <code-editor v-loading="codeSubmitLoading" :code.sync="codeSubmit.code" :language="codeSubmit.language"></code-editor>
+            <el-tab-pane :disabled="!problemDetail.testSet" label="代码提交" name="codeSubmit">
+              <code-editor v-loading="codeSubmitLoading" :code.sync="codeSubmit.code"
+                           :language="codeSubmit.language"></code-editor>
               <div style="text-align: right">
                 <el-select v-model="codeSubmit.language" placeholder="请选择代码语言" size="medium"
                            style="margin: 20px 20px 0 0; width: 200px">
@@ -65,7 +69,9 @@
                 作者</b>
             </el-col>
             <el-col :span="14" style="text-align: right">
-              <router-link class="el-link el-link--primary" :to="'/user/' + problemDetail.authorId" target="_blank">{{ authorUsername }}</router-link>
+              <router-link class="el-link el-link--primary" :to="'/user/' + problemDetail.authorId" target="_blank">
+                {{ authorUsername }}
+              </router-link>
             </el-col>
           </el-row>
           <el-divider class="horizontal-divider"></el-divider>
@@ -110,7 +116,6 @@
             </el-col>
           </el-row>
         </el-card>
-        <!--历史提交定时刷新-->
         <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 10px 15px'}">
           <template #header>
             <el-row align="middle" type="flex">
@@ -139,7 +144,10 @@
           <el-table v-loading="historySubmitLoading" :data="records" stripe style="width: 100%" size="medium">
             <el-table-column label="#" align="center" min-width="1">
               <template #default="scope">
-                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id">{{ scope.row.id }}</router-link>
+                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id">{{
+                    scope.row.id
+                  }}
+                </router-link>
               </template>
             </el-table-column>
             <el-table-column label="时间" align="center" min-width="2">
@@ -153,14 +161,17 @@
                 <el-tooltip effect="dark" :content="getResult(scope.row.judgeResult)" placement="top">
                   <el-tag size="small" :type="getResultType(scope.row.judgeResult)">{{
                       scope.row.judgeResult
-                    }}
+                    }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'"
+                          class="el-icon-loading"></i>
                   </el-tag>
                 </el-tooltip>
               </template>
             </el-table-column>
           </el-table>
           <div v-if="submit > limit" style="padding-top: 5px;text-align: center">
-            <router-link class="el-link el-link--primary" :to="'/record/list?problemId=' + problemDetail.id + '&onlySelf=true'" target="_blank">查看更多</router-link>
+            <router-link class="el-link el-link--primary"
+                         :to="'/record/list?problemId=' + problemDetail.id + '&onlySelf=true'" target="_blank">查看更多
+            </router-link>
           </div>
         </el-card>
       </el-aside>
@@ -219,11 +230,23 @@ export default {
           value: "CPP",
           label: "C++"
         }, {
+          value: "CPP11",
+          label: "C++11"
+        }, {
+          value: "CPP14",
+          label: "C++14"
+        }, {
+          value: "CPP17",
+          label: "C++17"
+        }, {
           value: "JAVA",
           label: "Java"
         }, {
-          value: "PY",
-          label: "Python"
+          value: "PY2",
+          label: "Python2"
+        }, {
+          value: "PY3",
+          label: "Python3"
         }]
       }
     }
@@ -240,26 +263,26 @@ export default {
               params: {
                 "id": this.problemDetail.authorId
               }
-              }).then((response) => {
-                this.authorUsername = response.data
-              }).catch((error) => {
-                this.$message.error(error.response.data)
-              })
+            }).then((response) => {
+              this.authorUsername = response.data
+            }).catch((error) => {
+              this.$message.error(error.response.data)
+            })
             // 异步获取该题提交和通过人数
             axios.get("/problems/" + this.id + "/amount"
             ).then((response) => {
               this.triedUserAmount = response.data.triedUserAmount || 0
-              this.passedUserAMount = response.data.passedUserAMount || 0
+              this.passedUserAMount = response.data.passedUserAmount || 0
             }).catch((error) => {
               this.$message.error(error.response.data)
             })
             // 异步获取用户在该题的提交和通过次数
             axios.get("/problems/" + this.problemDetail.id + "/users/" + this.$root.loginStatus.userid)
-              .then((response) => {
-                this.submit = response.data.submit || 0
-                this.accept = response.data.accept || 0
-              }).catch((error) => {
-                this.$message.error(error.response.data)
+                .then((response) => {
+                  this.submit = response.data.submit || 0
+                  this.accept = response.data.accept || 0
+                }).catch((error) => {
+              this.$message.error(error.response.data)
             })
             // 异步获取用户在该题的最近的提交记录
             this.historySubmitLoading = true
@@ -272,7 +295,7 @@ export default {
             }).then((response) => {
               this.historySubmitLoading = false
               this.records = response.data
-              if(this.records.length > 0) {
+              if (this.records.length > 0) {
                 this.codeSubmit.language = this.records[0].submitLanguage
                 this.codeSubmitLoading = true
                 axios.get("/records/" + this.records[0].id + "/code", {
@@ -306,10 +329,10 @@ export default {
       this.$router.replace(this.$route.path + "/edit")
     },
     submitCode: function () {
-      if(this.codeSubmit.language === ""){
+      if (this.codeSubmit.language === "") {
         this.$message.error("请选择提交语言")
         return
-      } else if(this.codeSubmit.code === "") {
+      } else if (this.codeSubmit.code === "") {
         this.$message.error("提交代码不能为空")
         return
       }
@@ -333,6 +356,8 @@ export default {
       switch (result) {
         case "PD":
           return "Pending"
+        case "JD":
+          return "Judging"
         case "CE":
           return "Compile Error"
         case "AC":
@@ -354,6 +379,7 @@ export default {
     getResultType: function (result) {
       switch (result) {
         case "PD":
+        case "JD":
           return "info"
         case "AC":
           return "success"
@@ -372,6 +398,29 @@ export default {
   },
   mounted: function () {
     this.update();
+    const timer = setInterval(() => {
+      let refresh = false;
+      for (const record of this.records) {
+        if (record.judgeResult === 'PD' || record.judgeResult === 'JD') {
+          refresh = true
+          break
+        }
+      }
+      if (refresh) {
+        axios.get("/records/recent", {
+          params: {
+            "problemId": this.id,
+            "userId": this.$root.loginStatus.userid,
+            "limit": this.limit
+          }
+        }).then((response) => {
+          this.records = response.data
+        })
+      }
+    }, 500)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer);
+    })
   }
 }
 </script>
@@ -411,6 +460,5 @@ export default {
   vertical-align: middle;
   position: relative;
 }
-
 
 </style>

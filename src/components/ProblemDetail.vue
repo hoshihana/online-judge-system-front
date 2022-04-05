@@ -1,5 +1,7 @@
 <template>
   <div>
+    <el-alert v-if="!problemDetail.testSet" style="margin: 10px;width: 350px" title="该题尚未配置测试点，无法提交代码" type="error"
+              show-icon close-text="知道了"></el-alert>
     <h3>题目描述</h3>
     <mavon-editor class="preview" :value="problemDetail.description" :box-shadow="false" previewBackground="#ffffff"
                   :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
