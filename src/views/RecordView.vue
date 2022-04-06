@@ -45,14 +45,27 @@
           </span>
         </div>
       </el-alert>
-      <div style="margin-top: 40px;padding: 15px">
+      <el-collapse accordion style="margin-top: 10px; padding: 15px; border: none">
+        <el-collapse-item>
+          <template #title>
+            <span style="font-size: larger">
+              <font-awesome-icon icon="fa-solid fa-gears"></font-awesome-icon>
+              编译结果
+            </span>
+          </template>
+          <div :style="{'color': compileOutputColor}" class="compile-output">{{ compileOutput }}</div>
+        </el-collapse-item>
+      </el-collapse>
+      <div style="margin-top: 10px;padding: 15px">
         <span style="padding-right: 20px">
             <font-awesome-icon icon="fa-solid fa-code"
                                fixed-width></font-awesome-icon> 语言：{{ getLanguage(record.submitLanguage) }}
           </span>
         <span style="padding-right: 20px">
             <font-awesome-icon icon="fa-solid fa-ruler-horizontal" fixed-width></font-awesome-icon>
-          代码长度：{{ record.codeLength < 1024 ? record.codeLength + " B" : (record.codeLength % 1024 === 0 ? record.codeLength / 1024 : (record.codeLength / 1024).toFixed(1)) + " KB" }}
+          代码长度：{{
+            record.codeLength < 1024 ? record.codeLength + " B" : (record.codeLength % 1024 === 0 ? record.codeLength / 1024 : (record.codeLength / 1024).toFixed(1)) + " KB"
+          }}
           </span>
         <span><el-button type="text" class="copyBtn" title="复制" :data-clipboard-text="code" @click="copy"
                          style="min-height: auto; padding: 0">
@@ -77,7 +90,6 @@ import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars'
 import 'codemirror/addon/display/autorefresh'
 import Clipboard from "clipboard";
-// todo 显示编译信息
 
 export default {
   name: "RecordView",
@@ -89,7 +101,9 @@ export default {
     return {
       loading: false,
       codeLoading: false,
+      compileOutputLoading: false,
       record: {},
+      compileOutput: "",
       code: "",
 
       options: {
@@ -98,7 +112,6 @@ export default {
         theme: "idea",
         lineNumbers: true,
         line: true,
-        styleActiveLine: true,
         scrollbarStyle: 'overlay',
         autoRefresh: true,
         readOnly: true
@@ -129,6 +142,15 @@ export default {
             this.loading = false
             this.$message.error(error.response.data)
           })
+      this.compileOutputLoading = true
+      axios.get("/records/" + this.id + "/compileOutput")
+          .then((response) => {
+            this.compileOutput = response.data;
+            this.compileOutputLoading = false;
+          }).catch((error) => {
+        this.compileOutput = error.response.data;
+        this.compileOutputLoading = false;
+      })
     },
     getLanguage: function (language) {
       switch (language) {
@@ -231,6 +253,15 @@ export default {
       this.$router.go(-1)
     }
   },
+  computed: {
+    compileOutputColor: function () {
+      if(this.record.judgeResult === 'CE') {
+        return '#F56C6C';
+      } else {
+        return '#909399'
+      }
+    }
+  },
   watch: {
     "record.submitLanguage": function (val) {
       this.options.mode = this.getMode(val)
@@ -243,6 +274,12 @@ export default {
       if (this.record.judgeResult !== undefined && (this.record.judgeResult === 'PD' || this.record.judgeResult === 'JD')) {
         axios.get("/records/" + this.id).then((response) => {
           this.record = response.data
+        })
+        axios.get("/records/" + this.id + "/compileOutput")
+            .then((response) => {
+              this.compileOutput = response.data;
+            }).catch((error) => {
+          this.compileOutput = error.response.data;
         })
       }
     }, 500)
@@ -285,5 +322,12 @@ export default {
   border-width: 3px;
   border-style: dashed dashed dashed none;
   border-color: rgb(230, 230, 230);
+}
+
+.compile-output {
+  padding-left: 20px;
+  white-space: pre-wrap;
+  font-family: Consolas;
+  line-height: 1.4
 }
 </style>

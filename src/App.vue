@@ -8,10 +8,11 @@
         <el-header height="50px">
           <top-bar></top-bar>
         </el-header>
-        <el-main style="height: 100%; background-color: #EBEEF5">
+        <el-main class="back-top-target" style="height: 100%; background-color: #EBEEF5">
           <router-view></router-view>
         </el-main>
       </el-container>
+      <el-backtop target=".back-top-target" :bottom="70"></el-backtop>
     </el-container>
   </div>
 </template>

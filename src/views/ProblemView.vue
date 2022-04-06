@@ -159,7 +159,7 @@
             <el-table-column label="结果" align="center" min-width="1">
               <template #default="scope">
                 <el-tooltip effect="dark" :content="getResult(scope.row.judgeResult)" placement="top">
-                  <el-tag size="small" :type="getResultType(scope.row.judgeResult)">{{
+                  <el-tag size="small" :type="getResultType(scope.row.judgeResult)" style="cursor: pointer" @click="$router.push('/record/' + scope.row.id)">{{
                       scope.row.judgeResult
                     }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'"
                           class="el-icon-loading"></i>

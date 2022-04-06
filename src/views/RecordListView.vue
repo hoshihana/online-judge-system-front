@@ -68,7 +68,7 @@
         </el-table-column>
         <el-table-column label="评测结果" align="center">
           <template #default="scope">
-            <el-tag size="small" :type="getResultType(scope.row.judgeResult)">{{
+            <el-tag size="small" style="cursor: pointer" :type="getResultType(scope.row.judgeResult)" @click="$router.push('/record/' + scope.row.id)">{{
                 getResult(scope.row.judgeResult)
               }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'" class="el-icon-loading"></i>
             </el-tag>
@@ -100,7 +100,6 @@
 <script>
 import axios from "@/utils/axios";
 
-// todo 该页面及题目的最近提交，点击评测结果tag后能够跳转至record页面
 export default {
   name: "RecordView",
   props: ["initProblemId", "initOnlySelf"],

@@ -20,7 +20,6 @@
             <el-button type="danger" size="medium" plain @click="deleteProblem">
               <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon>
               删除题目
-              <!--todo 删除确认弹窗-->
             </el-button>
           </el-col>
           <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目编辑：{{ id + " " + name }}</b>

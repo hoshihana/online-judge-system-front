@@ -44,9 +44,15 @@ export default {
     getMode: function (language) {
       switch (language) {
         case "C": return "text/x-csrc"
-        case "CPP": return "text/x-c++src"
+        case "CPP":
+        case "CPP11":
+        case "CPP14":
+        case "CPP17":
+          return "text/x-c++src"
         case "JAVA": return "text/x-java"
-        case "PY": return "text/x-python"
+        case "PY2":
+        case "PY3":
+          return "text/x-python"
         default: return ""
       }
     },
