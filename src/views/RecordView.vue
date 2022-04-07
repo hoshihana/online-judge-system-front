@@ -250,7 +250,7 @@ export default {
       });
     },
     back: function () {
-      this.$router.go(-1)
+      this.$router.push("/record/list")
     }
   },
   computed: {

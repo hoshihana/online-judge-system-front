@@ -51,7 +51,6 @@
                   <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon>
                   提交
                 </el-button>
-                <!--未配置数据点的题目不允许提交代码-->
               </div>
             </el-tab-pane>
           </el-tabs>
@@ -116,7 +115,7 @@
             </el-col>
           </el-row>
         </el-card>
-        <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 10px 15px'}">
+        <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 15px'}">
           <template #header>
             <el-row align="middle" type="flex">
               <el-col :span="8" style="text-align: left">
@@ -144,7 +143,7 @@
           <el-table v-loading="historySubmitLoading" :data="records" stripe style="width: 100%" size="medium">
             <el-table-column label="#" align="center" min-width="1">
               <template #default="scope">
-                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id">{{
+                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id" target="_blank">{{
                     scope.row.id
                   }}
                 </router-link>
@@ -159,7 +158,7 @@
             <el-table-column label="结果" align="center" min-width="1">
               <template #default="scope">
                 <el-tooltip effect="dark" :content="getResult(scope.row.judgeResult)" placement="top">
-                  <el-tag size="small" :type="getResultType(scope.row.judgeResult)" style="cursor: pointer" @click="$router.push('/record/' + scope.row.id)">{{
+                  <el-tag size="small" :type="getResultType(scope.row.judgeResult)" style="cursor: pointer" @click="goRecord(scope.row.id)">{{
                       scope.row.judgeResult
                     }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'"
                           class="el-icon-loading"></i>
@@ -168,10 +167,11 @@
               </template>
             </el-table-column>
           </el-table>
-          <div v-if="submit > limit" style="padding-top: 5px;text-align: center">
-            <router-link class="el-link el-link--primary"
-                         :to="'/record/list?problemId=' + problemDetail.id + '&onlySelf=true'" target="_blank">查看更多
-            </router-link>
+          <div v-if="submit !== '--' && submit > limit" style="text-align: center">
+            <el-button type="text" @click="dialogKey = new Date()">
+              查看更多
+            </el-button>
+            <personal-record-list-dialog :problem-id="id" :dialog-key="dialogKey" :problem-name="problemDetail.name"></personal-record-list-dialog>
           </div>
         </el-card>
       </el-aside>
@@ -183,10 +183,11 @@
 import CodeEditor from "@/components/CodeEditor";
 import ProblemDetail from "@/components/ProblemDetail";
 import axios from "@/utils/axios";
+import PersonalRecordListDialog from "@/components/PersonalRecordListDialog";
 
 export default {
   name: "ProblemView",
-  components: {ProblemDetail, CodeEditor},
+  components: {PersonalRecordListDialog, ProblemDetail, CodeEditor},
   props: ["id"],
   data: function () {
     return {
@@ -194,6 +195,8 @@ export default {
       historySubmitLoading: false,
       codeSubmitLoading: false,
       currentTab: "problemDetail",
+      checkMoreRecords: false,
+      dialogKey: new Date(),
 
       submit: "--",
       accept: "--",
@@ -395,6 +398,12 @@ export default {
           return ""
       }
     },
+    goRecord: function (recordId) {
+      let routeUrl = this.$router.resolve({
+        path: "/record/" + recordId,
+      });
+      window.open(routeUrl.href, '_blank');
+    }
   },
   mounted: function () {
     this.update();
@@ -416,6 +425,16 @@ export default {
         }).then((response) => {
           this.records = response.data
         })
+        axios.get("/problems/" + this.id + "/amount"
+        ).then((response) => {
+          this.triedUserAmount = response.data.triedUserAmount || 0
+          this.passedUserAMount = response.data.passedUserAmount || 0
+        })
+        axios.get("/problems/" + this.problemDetail.id + "/users/" + this.$root.loginStatus.userid)
+            .then((response) => {
+              this.submit = response.data.submit || 0
+              this.accept = response.data.accept || 0
+            })
       }
     }, 500)
     this.$once('hook:beforeDestroy', () => {

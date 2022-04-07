@@ -102,7 +102,6 @@ import axios from "@/utils/axios";
 
 export default {
   name: "RecordView",
-  props: ["initProblemId", "initOnlySelf"],
   data: function () {
     return {
       loading: false,
@@ -302,12 +301,6 @@ export default {
     }
   },
   mounted: function () {
-    if (this.initProblemId !== undefined)
-      this.problemId = this.initProblemId
-    if (this.initOnlySelf === "true") {
-      this.disableUsername = true
-      this.onlySelf = true
-    }
     this.update()
   }
 }
