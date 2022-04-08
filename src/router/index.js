@@ -49,7 +49,21 @@ const routes = [
         path: '/problem/:id',
         name: 'problem',
         component: ProblemView,
-        props: true
+        props: true,
+        beforeEnter: function (to, from, next) {
+            axios.post("/problems/" + to.params.id + "/exists")
+                .then((response) => {
+                    if (response.data === true) {
+                        next()
+                    } else {
+                        router.app.$message.error("题目不存在");
+                        next(false)
+                    }
+                }).catch((error) => {
+                router.app.$message.error(error.response.data)
+                next(false)
+            })
+        }
     },
     {
         path: '/problem/:id/edit',

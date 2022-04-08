@@ -12,7 +12,7 @@
           <router-view></router-view>
         </el-main>
       </el-container>
-      <el-backtop target=".back-top-target" :bottom="70"></el-backtop>
+      <el-backtop target=".back-top-target" :bottom="100"></el-backtop>
     </el-container>
   </div>
 </template>

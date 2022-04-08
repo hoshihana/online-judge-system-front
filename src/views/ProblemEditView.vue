@@ -66,6 +66,27 @@
           <br>
           <h3>说明</h3>
           <mavon-editor v-model="explanation" :toolbars="toolbars" style="margin: 15px"></mavon-editor>
+          <h3 style="margin-top: 40px">题目状态</h3>
+          <div style="margin: 15px">
+            <el-radio-group v-model="visibility">
+              <el-radio label="PRIVATE">私密题目</el-radio>
+              <el-radio label="HIDDEN">练习/比赛题目</el-radio>
+              <el-radio label="PUBLIC">公开题目</el-radio>
+            </el-radio-group>
+          </div>
+          <el-alert
+              type="warning"
+              :closable="false"
+              style="margin-top: 20px; margin-bottom: 20px; width: 700px">
+            <template #title>
+              <span style="font-size: larger"><i class="el-icon-warning"></i> 题目状态说明</span>
+            </template>
+            <ul style="padding-left: 10px; font-size: larger;">
+              <li><b>私密题目：</b>仅题目作者可见，其提交记录也是仅作者可见</li>
+              <li><b>练习/比赛题目：</b>仅题目作者和练习/比赛的参加者可见，其全部提交记录作者可见，当练习/比赛进行时，参加者仅能查看自己的提交记录，结束后则可以查看所有参加者的提交记录</li>
+              <li><b>公开题目：</b>所有用户可见，其提交记录也是所有用户可见</li>
+            </ul>
+          </el-alert>
           <div style="text-align: right">
             <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
@@ -264,7 +285,7 @@ export default {
       explanation: "",
       timeLimit: 500,
       memoryLimit: 128,
-      visibility: null,
+      visibility: 'PRIVATE',
       samples: [],
       uploadUrl: "",
       testSet: false,
@@ -300,7 +321,7 @@ export default {
     if (this.saved) {
       next()
     } else {
-      this.$confirm('可能有未保存的修改, 是否继续离开?', '确认信息', {
+      this.$confirm(this.existent ? '可能有未保存的修改, 是否继续离开?' : '创建的题目尚未保存，是否继续离开？', '确认信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -331,6 +352,7 @@ export default {
             this.explanation = response.data.explanation
             this.timeLimit = response.data.timeLimit
             this.memoryLimit = response.data.memoryLimit
+            this.visibility = response.data.visibility
           })
           .catch((error) => {
             this.loading = false
@@ -381,7 +403,8 @@ export default {
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
           "timeLimit": this.timeLimit,
-          "memoryLimit": this.memoryLimit
+          "memoryLimit": this.memoryLimit,
+          "visibility": this.visibility
         }).then((response) => {
           this.loading = false
           this.$message({
@@ -409,7 +432,8 @@ export default {
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
           "timeLimit": this.timeLimit,
-          "memoryLimit": this.memoryLimit
+          "memoryLimit": this.memoryLimit,
+          "visibility": this.visibility
         }).then((response) => {
           this.loading = false
           this.$message({

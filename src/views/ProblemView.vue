@@ -69,7 +69,7 @@
             </el-col>
             <el-col :span="14" style="text-align: right">
               <router-link class="el-link el-link--primary" :to="'/user/' + problemDetail.authorId" target="_blank">
-                {{ authorUsername }}
+                {{ problemDetail.authorUsername }}
               </router-link>
             </el-col>
           </el-row>
@@ -203,13 +203,13 @@ export default {
       limit: 3,
       records: [],
 
-      authorUsername: "--",
       triedUserAmount: "--",
       passedUserAMount: "--",
 
       problemDetail: {
         id: null,
         authorId: null,
+        authorUsername: null,
         name: "",
         description: "",
         inputFormat: "",
@@ -261,16 +261,6 @@ export default {
           .then((response) => {
             this.problemDetail = response.data
             this.loading = false
-            // 异步获取作者用户名
-            axios.get("/accounts/username", {
-              params: {
-                "id": this.problemDetail.authorId
-              }
-            }).then((response) => {
-              this.authorUsername = response.data
-            }).catch((error) => {
-              this.$message.error(error.response.data)
-            })
             // 异步获取该题提交和通过人数
             axios.get("/problems/" + this.id + "/amount"
             ).then((response) => {
@@ -341,7 +331,6 @@ export default {
       }
       this.loading = true
       axios.post("/records", {
-        "userId": this.$root.loginStatus.userid,
         "problemId": this.id,
         "submitLanguage": this.codeSubmit.language,
         "code": this.codeSubmit.code
