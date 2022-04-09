@@ -262,7 +262,7 @@ export default {
             this.problemDetail = response.data
             this.loading = false
             // 异步获取该题提交和通过人数
-            axios.get("/problems/" + this.id + "/amount"
+            axios.get("/problems/" + this.id + "/status"
             ).then((response) => {
               this.triedUserAmount = response.data.triedUserAmount || 0
               this.passedUserAMount = response.data.passedUserAmount || 0
@@ -408,7 +408,6 @@ export default {
         axios.get("/records/recent", {
           params: {
             "problemId": this.id,
-            "userId": this.$root.loginStatus.userid,
             "limit": this.limit
           }
         }).then((response) => {

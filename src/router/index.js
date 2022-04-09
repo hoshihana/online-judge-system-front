@@ -51,14 +51,9 @@ const routes = [
         component: ProblemView,
         props: true,
         beforeEnter: function (to, from, next) {
-            axios.post("/problems/" + to.params.id + "/exists")
-                .then((response) => {
-                    if (response.data === true) {
-                        next()
-                    } else {
-                        router.app.$message.error("题目不存在");
-                        next(false)
-                    }
+            axios.post("/problems/" + to.params.id + "/check")
+                .then(() => {
+                    next()
                 }).catch((error) => {
                 router.app.$message.error(error.response.data)
                 next(false)
