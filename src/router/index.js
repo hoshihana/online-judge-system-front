@@ -15,6 +15,7 @@ import UserHomeView from "@/views/UserHomeView";
 import UserProfileView from "@/views/UserProfileView";
 import UserProblemListView from "@/views/UserProblemListView";
 import RecordView from "@/views/RecordView";
+import contestCreateView from "@/views/ContestCreateView";
 
 Vue.use(VueRouter)
 
@@ -65,6 +66,11 @@ const routes = [
         name: 'problemEdit',
         component: ProblemEditView,
         props: true,
+    },
+    {
+        path: '/contest/new',
+        name: 'contestNew',
+        component: contestCreateView,
     },
     {
         path: '/user/:id',

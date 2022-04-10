@@ -186,6 +186,7 @@ export default {
         }
       }).then((response) => {
         this.total = response.data;
+        this.pageIndex = Math.max(Math.min(this.pageIndex, Math.ceil(this.total / this.pageSize)), 1);
         axios.get("/records", {
           params: {
             "problemId": this.problemId,

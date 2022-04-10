@@ -11,8 +11,8 @@
         <el-main class="back-top-target" style="height: 100%; background-color: #EBEEF5">
           <router-view></router-view>
         </el-main>
+        <el-backtop target=".back-top-target" :bottom="100" :right="20"></el-backtop>
       </el-container>
-      <el-backtop target=".back-top-target" :bottom="100"></el-backtop>
     </el-container>
   </div>
 </template>

@@ -37,7 +37,7 @@
           <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
           <br>
           <h3>输入格式</h3>
-          <mavon-editor v-model="inputFormat" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
+          <mavon-editor v-model="inputFormat" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px; z-index: inherit"></mavon-editor>
           <br>
           <h3>输出格式</h3>
           <mavon-editor v-model="outputFormat" :toolbars="toolbars" :xssOptions="{}"
@@ -227,6 +227,8 @@ import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
 import JSZip from "jszip"
 import router from "@/router";
+
+// todo 将题目创建和题目编辑页面分离
 
 export default {
   name: "ProblemEditView",
@@ -438,7 +440,7 @@ export default {
           this.loading = false
           this.$message.success(response.data)
           this.saved = true
-          this.$router.replace("/problem/" + response.data)
+          this.$router.replace("/problem/" + this.id)
         }).catch((error) => {
           this.loading = false
           this.$message.error(error.response.data)

@@ -2,12 +2,11 @@
   <div>
     <el-card body-style="padding-top: 2px">
       <template #header>
-        <el-input :placeholder="placeholder" v-model="key" clearable style="width: 250px" @input="search" maxlength="40">
+        <el-input placeholder="题号/题目名" v-model="key" clearable style="width: 250px" @input="search" maxlength="40">
           <template #prefix>
             &nbsp;<font-awesome-icon icon="fa-solid fa-magnifying-glass"></font-awesome-icon>
           </template>
         </el-input>
-        <el-switch v-model="byId" active-text="按题号查询" style="margin-left: 10px" @change="changeById"></el-switch>
       </template>
       <el-table v-loading="loading" :data="problemEntries" stripe style="width: 100%">
         <el-table-column label="#" min-width="1" align="center">
@@ -49,7 +48,8 @@
 <script>
 import axios from "@/utils/axios";
 
-//todo 页面太宽，也许侧边可以加些其他元素，或添加算法标签
+// todo 页面太宽，也许侧边可以加些其他元素，或添加算法标签
+// todo 将搜索框改成点击搜索触发更新
 
 export default {
   name: "ProblemsView",
@@ -57,18 +57,11 @@ export default {
     return {
       loading: false,
       key: "",
-      byId: false,
       total: 0,
       pageIndex: 1,
       pageSize: 20,
       problemEntries: []
     }
-  },
-  computed: {
-    placeholder: function () {
-      return this.byId ? "请输入题号" : "请输入题目名";
-    },
-
   },
   methods: {
     update: function () {
@@ -76,14 +69,13 @@ export default {
       axios.get("/problemEntries/public/amount", {
         params: {
           "key": this.key,
-          "byId": this.byId
         }
       }).then((response) => {
         this.total = response.data;
+        this.pageIndex = Math.max(Math.min(this.pageIndex, Math.ceil(this.total / this.pageSize)), 1);
         axios.get("/problemEntries/public", {
           params: {
             "key": this.key,
-            "byId": this.byId,
             "pageIndex": this.pageIndex,
             "pageSize": this.pageSize
           }
@@ -100,10 +92,6 @@ export default {
       })
     },
     search: function () {
-      this.pageIndex = 1
-      this.update()
-    },
-    changeById: function () {
       this.pageIndex = 1
       this.update()
     },
