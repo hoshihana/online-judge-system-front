@@ -12,18 +12,11 @@
           <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛创建</b></el-col>
         </el-row>
       </template>
-      <el-tabs tab-position="left" stretch ref="table">
-        <el-tab-pane label="比赛编辑">
+      <el-tabs tab-position="left" stretch ref="table" v-model="activeName">
+        <el-tab-pane label="比赛编辑" name="contestEdit">
           <h3>比赛名<b style="color: #F56C6C">*</b></h3>
-          <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
-                    style="width: 60%; margin: 15px"></el-input>
-          <h3>比赛类型<b style="color: #F56C6C">*</b></h3>
-          <div style="margin: 15px">
-            <el-radio-group v-model="type">
-              <el-radio label="COMP">竞赛</el-radio>
-              <el-radio label="PRAC">练习</el-radio>
-            </el-radio-group>
-          </div>
+          <el-input type="text" v-model="name" placeholder="比赛名" maxlength="40" show-word-limit
+                    style="width: 45%; margin: 15px"></el-input>
           <h3>
             比赛时间<b style="color: #F56C6C">*</b>
           </h3>
@@ -32,37 +25,49 @@
                           type="datetimerange"
                           start-placeholder="比赛开始时间"
                           end-placeholder="比赛结束时间"></el-date-picker>
+          <h3>比赛类型</h3>
+          <div style="margin: 15px">
+            <el-radio-group v-model="type">
+              <el-radio label="COMP">竞赛</el-radio>
+              <el-radio label="PRAC">练习</el-radio>
+            </el-radio-group>
+          </div>
           <h3>比赛描述</h3>
           <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}"
                         style="margin: 15px; min-height: 400px"></mavon-editor>
           <h3 style="margin-top: 30px">参赛设置</h3>
           <div style="margin: 15px">
             <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"></el-switch>
-            <el-input v-if="passwordSet" type="password" placeholder="参赛密码" v-model="password" show-password
+            <el-input v-if="passwordSet" type="password" placeholder="6到16位的数字或字母" v-model="password" show-password
                       style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain>
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="createContest">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
-              保存
+              创建
             </el-button>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="题目配置">
+        <el-tab-pane label="题目配置" name="problemSet">
           <el-row type="flex">
-            <el-col :span="12">
+            <el-col :span="13">
               <h3>
                 我的题目
                 <el-input placeholder="题号/题目名" v-model="key" clearable size="medium" style="width: 50%"
                           maxlength="40">
                 </el-input>
-                <el-button type="primary" plain size="medium" @click="update" style="margin-left: 2%">
+                <el-button type="primary" plain size="medium" @click="update" style="margin-left: 2%"
+                           :disabled="loading">
                   <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
                   搜索
                 </el-button>
+                <el-button type="text" @click="update" style="margin-left: 20px" :disabled="loading">
+                  <font-awesome-icon icon="fa-solid fa-arrows-rotate" fixed-width></font-awesome-icon>
+                  刷新
+                </el-button>
               </h3>
               <el-card style="margin: 15px">
-                <el-table :data="problemEntries" stripe :key="tableKey">
+                <el-table :data="problemEntries" stripe max-height="430">
                   <el-table-column label="题号" min-width="1">
                     <template #default="scope">
                       <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id" target="_blank">{{
@@ -86,7 +91,8 @@
                   class="el-icon-arrow-down el-icon--right"></i></span>
                         <template #dropdown>
                           <el-dropdown-menu>
-                            <el-checkbox v-model="showPrivate" style="margin: 0 10px" @change="update">私密题目</el-checkbox>
+                            <el-checkbox v-model="showPrivate" style="margin: 0 10px" @change="update">私密题目
+                            </el-checkbox>
                             <br>
                             <el-checkbox v-model="showHidden" style="margin: 10px 10px 0" @change="update">比赛题目
                             </el-checkbox>
@@ -98,33 +104,81 @@
                       </el-dropdown>
                     </template>
                     <template #default="scope">
-                      <el-tag v-if="scope.row.visibility === 'PRIVATE'" type="danger" size="medium">私密题目</el-tag>
-                      <el-tag v-if="scope.row.visibility === 'HIDDEN'" type="warning" size="medium">比赛题目</el-tag>
-                      <el-tag v-if="scope.row.visibility === 'PUBLIC'" type="success" size="medium">公开题目</el-tag>
+                      <el-tag :type="getTagType(scope.row.visibility)" size="medium">{{
+                          getTagText(scope.row.visibility)
+                        }}
+                      </el-tag>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" min-width="2" align="center" :key="Math.random().toString()">
                     <template #default="scope">
-                      <el-button v-if="scope.row.isSelected" style="padding: 0; min-height: 0; color: #F56C6C" type="text" @click="unselect(scope.$index)">
-                        <font-awesome-icon icon="fa-solid fa-minus"></font-awesome-icon> 删除
+                      <el-button v-if="selectedProblemIds.has(scope.row.id)"
+                                 style="padding: 0; min-height: 0; color: #F56C6C"
+                                 type="text" @click="unselect(scope.row)">
+                        <font-awesome-icon icon="fa-solid fa-angles-left"></font-awesome-icon>
+                        删除
                       </el-button>
-                      <el-button v-else style="padding: 0; min-height: 0" type="text" @click="select(scope.$index)">
-                        <font-awesome-icon icon="fa-solid fa-plus"></font-awesome-icon> 添加
+                      <el-button v-else style="padding: 0; min-height: 0" type="text" @click="select(scope.row)">
+                        <font-awesome-icon icon="fa-solid fa-angles-right"></font-awesome-icon>
+                        添加
                       </el-button>
                     </template>
                   </el-table-column>
                 </el-table>
               </el-card>
             </el-col>
-            <el-col :span="2"></el-col>
+            <el-col :span="1"></el-col>
             <el-col :span="10">
-              <h3>题目列表</h3>
-              <el-card style="margin: 15px">
-
+              <h3>
+                题目列表
+                <el-popconfirm
+                    confirm-button-text='确定'
+                    cancel-button-text='不用了'
+                    icon="el-icon-warning"
+                    title="确定要清空当前题目列表吗？"
+                    @confirm="clear"
+                >
+                  <template #reference>
+                    <el-button type="danger" plain size="medium" style="margin-left: 2%" :disabled="selectedProblemEntries.length === 0">
+                      <font-awesome-icon icon="fa-solid fa-trash-can" fixed-width></font-awesome-icon>
+                      清空
+                    </el-button>
+                  </template>
+                </el-popconfirm>
+              </h3>
+              <el-card style="margin: 15px;">
+                <div style="max-height: 430px; overflow-y: auto;">
+                  <div style="float: left;">
+                    <div v-for="i in Math.max(10, selectedProblemEntries.length)" class="selected-number" :key="i">{{
+                        i
+                      }}
+                      <font-awesome-icon icon="fa-solid fa-caret-right"></font-awesome-icon>
+                    </div>
+                  </div>
+                  <draggable :list="selectedProblemEntries" animation="300" ghost-class="drag-ghost"
+                             chosen-class="drag-chosen" :scroll="true">
+                    <el-tag v-for="(problemEntry, index) in selectedProblemEntries" :key="problemEntry.id"
+                            :disable-transitions="false"
+                            :type="getTagType(problemEntry.visibility)" class="drag-tag">
+                      <font-awesome-icon icon="fa-solid fa-grip" style="margin: auto 5px auto 0"></font-awesome-icon>
+                      <router-link :to="'/problem/' + problemEntry.id" target="_blank"
+                                   :class="'el-link el-link--' + getTagType(problemEntry.visibility)">
+                        {{ problemEntry.id + " " + problemEntry.name }}
+                      </router-link>
+                      <i class="el-tag__close el-icon-close" style="margin: auto 0 auto auto"
+                         @click="remove(index)"></i>
+                    </el-tag>
+                  </draggable>
+                </div>
               </el-card>
             </el-col>
           </el-row>
-
+          <div style="text-align: right">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="createContest">
+              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
+              创建
+            </el-button>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -135,15 +189,18 @@
 import {mavonEditor} from "mavon-editor";
 import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
+import draggable from 'vuedraggable'
 
 export default {
   name: "ContestCreateView",
   components: {
-    mavonEditor
+    mavonEditor,
+    draggable
   },
   data: function () {
     return {
       loading: false,
+      activeName: "contestEdit",
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -181,7 +238,7 @@ export default {
       },
       name: "",
       type: "COMP",
-      time: [],
+      time: null,
       description: "",
       passwordSet: false,
       password: "",
@@ -191,12 +248,12 @@ export default {
       showPublic: false,
       problemEntries: [],
       selectedProblemEntries: [],
-      tableKey: 0
+      selectedProblemIds: new Set(),
     }
   },
   methods: {
     update: function () {
-      this.loading = true;
+      this.loading = true
       axios.get("/problemEntries/user/" + this.$root.loginStatus.userid + "/all", {
         params: {
           "key": this.key,
@@ -206,39 +263,138 @@ export default {
         }
       }).then((response) => {
         this.problemEntries = response.data
-        for(let i = 0; i < this.problemEntries.length; i++) {
-          this.problemEntries[i].isSelected = this.isSelected(this.problemEntries[i].id);
-        }
         this.loading = false
       }).catch((error) => {
         this.loading = false
         this.$message.error(error.response.data)
       })
     },
-    isSelected: function (problemId) {
-      for(let i = 0; i < this.selectedProblemEntries.length; i++) {
-        if(this.selectedProblemEntries[i].id === problemId) {
-          return true
-        }
+    getTagText: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "私密题目"
+        case "HIDDEN":
+          return "比赛题目"
+        case "PUBLIC":
+          return "公开题目"
       }
-      return false
     },
-    select: function (index) {
-      this.selectedProblemEntries.push(this.problemEntries[index])
-      this.problemEntries[index].isSelected = true
-      this.tableKey++
+    getTagType: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "danger"
+        case "HIDDEN":
+          return "warning"
+        case "PUBLIC":
+          return "success"
+      }
     },
-    unselect: function (index) {
-      for(let i = 0; i < this.selectedProblemEntries.length; i++) {
-        if(this.selectedProblemEntries[i].id === this.problemEntries[index].id) {
-          this.selectedProblemEntries.splice(i, 1);
-          this.problemEntries[index].isSelected = false
-          this.tableKey++
+    select: function (problemEntry) {
+      if (problemEntry.visibility === "PRIVATE") {
+        this.$confirm('该题目是私密题目，除作者以外的其他用户将无法查看并提交，是否继续添加至题目列表？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.selectedProblemEntries.push(problemEntry)
+          this.selectedProblemIds.add(problemEntry.id)
+        })
+      } else if (problemEntry.visibility === "PUBLIC") {
+        this.$confirm('该题目是公开题目，所有登录用户都可以不通过比赛直接查看并提交，是否继续添加至题目列表？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.selectedProblemEntries.push(problemEntry)
+          this.selectedProblemIds.add(problemEntry.id)
+        })
+      } else {
+        this.selectedProblemEntries.push(problemEntry)
+        this.selectedProblemIds.add(problemEntry.id)
+      }
+    },
+    unselect: function (problemEntry) {
+      for (let i = 0; i < this.selectedProblemEntries.length; i++) {
+        if (this.selectedProblemEntries[i].id === problemEntry.id) {
+          this.selectedProblemEntries.splice(i, 1)
           break
         }
       }
+      this.selectedProblemIds.delete(problemEntry.id)
+    },
+    remove: function (index) {
+      this.selectedProblemIds.delete(this.selectedProblemEntries[index].id)
+      this.selectedProblemEntries.splice(index, 1)
+    },
+    clear: function () {
+      this.selectedProblemIds.clear()
+      this.selectedProblemEntries.splice(0, this.selectedProblemEntries.length)
     },
     backToUserContestList: function () {
+    },
+    create: function () {
+      let problemIds = []
+      for(let problemEntry of this.selectedProblemEntries) {
+        problemIds.push(problemEntry.id)
+      }
+      axios.post("/contests", {
+        "name": this.name,
+        "type": this.type,
+        "description": this.description,
+        "passwordSet": this.passwordSet,
+        "password": this.password,
+        "startTime": this.time[0],
+        "endTime": this.time[1],
+        "problemIds": problemIds
+      }).then(() => {
+        this.$message.success("比赛创建成功")
+        this.$router.push("/user/" + this.$root.loginStatus.userid + "/problems") // todo 跳转至创建的比赛页面
+      }).catch((error) => {
+        this.$message.error(error.response.data)
+      })
+    },
+    createContest: function () {
+      if (this.name === "") {
+        this.$message.error("比赛名不能为空")
+        return
+      }
+      if (this.time === null) {
+        this.$message.error("比赛时间不能为空")
+        return
+      }
+      if (this.time[0].getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
+        this.$message.error("比赛开始时间必须至少在当前时间的5分钟之后")
+        return
+      }
+      if (this.time[0].getTime() >= this.time[1].getTime()) {
+        this.$message.error("比赛结束时间必须在开始时间之后")
+        return
+      }
+      if (this.passwordSet) {
+        if (this.password === "") {
+          this.$message.error("参赛密码不能为空")
+          return
+        }
+        if (!/^[A-Za-z0-9]{6,16}$/.test(this.password)) {
+          this.$message.error("参赛密码不符合格式，必须由6到16位的数字或字母组成")
+          return
+        }
+      }
+      if (this.selectedProblemEntries.length === 0) {
+        this.$confirm('题目列表为空，是否继续创建？', '确认信息', {
+          distinguishCancelAndClose: true,
+          confirmButtonText: '确定',
+          cancelButtonText: '前往配置'
+        }).then(() => {
+          this.create()
+        }).catch((action) => {
+          if(action === 'cancel') {
+            this.activeName = "problemSet"
+          }
+        });
+      } else {
+        this.create()
+      }
     }
   },
   mounted: function () {
@@ -250,6 +406,29 @@ export default {
 <style scoped>
 .active-filter {
   color: #409EFF;
+}
+
+.drag-chosen {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3)
+}
+
+.drag-ghost {
+  opacity: 40%;
+}
+
+.selected-number {
+  height: 32px;
+  text-align: right;
+  line-height: 32px;
+  color: #909399;
+  margin: 10px 5px 10px 0;
+}
+
+.drag-tag {
+  display: flex;
+  width: auto;
+  margin: 10px 5px;
+  cursor: move;
 }
 
 h3 {

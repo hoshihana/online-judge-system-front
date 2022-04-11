@@ -13,9 +13,10 @@
         <el-table-column min-width="5">
           <template #header>
             题目名
-            <el-input placeholder="题号/题目名" v-model="key" clearable size="medium" style="margin-left: 5%; width: 50%" maxlength="40">
+            <el-input placeholder="题号/题目名" v-model="key" clearable size="medium" style="margin-left: 5%; width: 50%"
+                      maxlength="40">
             </el-input>
-            <el-button type="primary" plain size="medium" @click="update" style="margin-left: 2%">
+            <el-button type="primary" plain size="medium" @click="update" style="margin-left: 2%" :disabled="loading">
               <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
               搜索
             </el-button>
@@ -54,9 +55,8 @@
             </el-dropdown>
           </template>
           <template #default="scope">
-            <el-tag v-if="scope.row.visibility === 'PRIVATE'" type="danger" size="medium">私密题目</el-tag>
-            <el-tag v-if="scope.row.visibility === 'HIDDEN'" type="warning" size="medium">比赛题目</el-tag>
-            <el-tag v-if="scope.row.visibility === 'PUBLIC'" type="success" size="medium">公开题目</el-tag>
+            <el-tag :type="getTagType(scope.row.visibility)" size="medium">{{ getTagText(scope.row.visibility) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column min-width="2" align="center">
@@ -149,6 +149,26 @@ export default {
         this.loading = false
         this.$message.error(error.response.data)
       })
+    },
+    getTagText: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "私密题目"
+        case "HIDDEN":
+          return "比赛题目"
+        case "PUBLIC":
+          return "公开题目"
+      }
+    },
+    getTagType: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "danger"
+        case "HIDDEN":
+          return "warning"
+        case "PUBLIC":
+          return "success"
+      }
     },
     editProblem: function (id) {
       this.$router.push("/problem/" + id + "/edit")
