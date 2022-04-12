@@ -12,11 +12,11 @@
         <span v-if="!isCollapse"> 题目</span>
       </div>
     </el-tooltip>
-    <el-tooltip :disabled="!isCollapse" content="题集" placement="right">
-      <div :class="['item-div', {'item-div-active': currentPath === '/problemSet/list'}]"
-           @click="goto('/problemSet/list')">
+    <el-tooltip :disabled="!isCollapse" content="比赛" placement="right">
+      <div :class="['item-div', {'item-div-active': currentPath === '/contest/list'}]"
+           @click="goto('/contest/list')">
         <font-awesome-icon icon="fa-solid  fa-clipboard-list" fixed-width></font-awesome-icon>
-        <span v-if="!isCollapse"> 题集</span>
+        <span v-if="!isCollapse"> 比赛</span>
       </div>
     </el-tooltip>
     <el-tooltip :disabled="!isCollapse" content="记录" placement="right">

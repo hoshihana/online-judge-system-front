@@ -11,7 +11,8 @@
           <el-dropdown-menu style="text-align: center">
             <el-dropdown-item command="home"><font-awesome-icon icon="fa-solid  fa-home-user"></font-awesome-icon> 我的主页</el-dropdown-item>
             <el-dropdown-item command="profile"><font-awesome-icon icon="fa-solid  fa-address-card"></font-awesome-icon> 个人信息</el-dropdown-item>
-            <el-dropdown-item command="problem list"><font-awesome-icon icon="fa-solid  fa-book"></font-awesome-icon> 我的题库</el-dropdown-item>
+            <el-dropdown-item command="problem list"><font-awesome-icon icon="fa-solid  fa-book"></font-awesome-icon> 我的题目</el-dropdown-item>
+            <el-dropdown-item command="contest list"><font-awesome-icon icon="fa-solid  fa-clipboard-list"></font-awesome-icon> 我的比赛</el-dropdown-item>
             <el-dropdown-item command="logout"><font-awesome-icon icon="fa-solid  fa-arrow-right-from-bracket"></font-awesome-icon> 登出</el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -64,6 +65,9 @@ export default {
           break;
         case "problem list":
           this.$router.push("/user/" + this.$root.loginStatus.userid + "/problem/list");
+          break;
+        case "contest list":
+          this.$router.push("/user/" + this.$root.loginStatus.userid + "/contest/list");
           break;
       }
     }

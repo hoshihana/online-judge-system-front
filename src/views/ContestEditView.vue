@@ -1,15 +1,15 @@
 <template>
   <div>
-    <el-card>
+    <el-card v-loading="loading">
       <template #header>
         <el-row>
           <el-col :span="8" style="text-align: left">
-            <el-button type="primary" size="medium" plain @click="backToUserContestList">
+            <el-button type="primary" size="medium" plain @click="backToContest">
               <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
-              返回我的比赛
+              返回比赛
             </el-button>
           </el-col>
-          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛创建</b></el-col>
+          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛编辑：{{ id }} {{ name }}</b></el-col>
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch ref="table" v-model="activeName">
@@ -18,7 +18,8 @@
           <el-input type="text" v-model="name" placeholder="比赛名" maxlength="40" show-word-limit
                     style="width: 45%; margin: 15px"></el-input>
           <h3>
-            比赛时间<b style="color: #F56C6C">*</b>
+            <span style="line-height: 32px">比赛时间<b style="color: #F56C6C">*</b></span>
+            <el-tag style="margin-left: 20px" :type="getStatusTagType()">{{this.getStatusTagText()}}</el-tag>
           </h3>
           <el-date-picker style="margin: 15px"
                           v-model="time"
@@ -38,7 +39,8 @@
           <h3 style="margin-top: 30px">参赛设置</h3>
           <div style="margin: 15px">
             <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"></el-switch>
-            <el-input v-if="passwordSet" type="password" placeholder="6到16位的数字或字母" v-model="password" show-password
+            <el-input v-if="passwordSet" v-loading="passwordLoading" type="password" placeholder="6到16位的数字或字母"
+                      v-model="password" show-password
                       style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
@@ -57,11 +59,11 @@
                           maxlength="40">
                 </el-input>
                 <el-button type="primary" plain size="medium" @click="update" style="margin-left: 2%"
-                           :disabled="loading">
+                           :disabled="problemListLoading">
                   <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
                   搜索
                 </el-button>
-                <el-button type="text" @click="update" style="margin-left: 20px" :disabled="loading">
+                <el-button type="text" @click="update" style="margin-left: 20px" :disabled="problemListLoading">
                   <font-awesome-icon icon="fa-solid fa-arrows-rotate" fixed-width></font-awesome-icon>
                   刷新
                 </el-button>
@@ -139,14 +141,16 @@
                     @confirm="clear"
                 >
                   <template #reference>
-                    <el-button type="danger" plain size="medium" style="margin-left: 2%" :disabled="selectedProblemEntries.length === 0">
+                    <el-button type="danger" plain size="medium" style="margin-left: 2%"
+                               :disabled="selectedProblemEntries.length === 0">
                       <font-awesome-icon icon="fa-solid fa-trash-can" fixed-width></font-awesome-icon>
                       清空
                     </el-button>
                   </template>
                 </el-popconfirm>
               </h3>
-              <el-card style="margin: 15px" body-style="padding-top: 5px; padding-bottom: 5px">
+              <el-card v-loading="selectedProblemListLoading" style="margin: 15px"
+                       body-style="padding-top: 5px; padding-bottom: 5px">
                 <div style="max-height: 430px; overflow-y: auto;">
                   <div style="float: left;">
                     <div v-for="i in Math.max(10, selectedProblemEntries.length)" class="selected-number" :key="i">{{
@@ -174,9 +178,9 @@
             </el-col>
           </el-row>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="createContest">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="saveContest">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
-              创建
+              保存
             </el-button>
           </div>
         </el-tab-pane>
@@ -192,7 +196,8 @@ import axios from "@/utils/axios";
 import draggable from 'vuedraggable'
 
 export default {
-  name: "ContestCreateView",
+  name: "ContestEditView",
+  props: ["id"],
   components: {
     mavonEditor,
     draggable
@@ -200,6 +205,9 @@ export default {
   data: function () {
     return {
       loading: false,
+      passwordLoading: false,
+      selectedProblemListLoading: false,
+      problemListLoading: false,
       saved: false,
       activeName: "contestEdit",
       toolbars: {
@@ -240,6 +248,7 @@ export default {
       name: "",
       type: "COMP",
       time: null,
+      status: "before",
       description: "",
       passwordSet: false,
       password: "",
@@ -254,7 +263,7 @@ export default {
   },
   methods: {
     update: function () {
-      this.loading = true
+      this.problemListLoading = true
       axios.get("/problemEntries/user/" + this.$root.loginStatus.userid + "/all", {
         params: {
           "key": this.key,
@@ -264,9 +273,9 @@ export default {
         }
       }).then((response) => {
         this.problemEntries = response.data
-        this.loading = false
+        this.problemListLoading = false
       }).catch((error) => {
-        this.loading = false
+        this.problemListLoading = false
         this.$message.error(error.response.data)
       })
     },
@@ -288,6 +297,24 @@ export default {
           return "warning"
         case "PUBLIC":
           return "success"
+      }
+    },
+    getStatusTagType: function () {
+      if (this.status === "before") {
+        return ""
+      } else if (this.status === "after") {
+        return "info"
+      } else {
+        return "success"
+      }
+    },
+    getStatusTagText: function () {
+      if (this.status === "before") {
+        return "未开始"
+      } else if (this.status === "after") {
+        return "已结束"
+      } else {
+        return "进行中"
       }
     },
     select: function (problemEntry) {
@@ -331,32 +358,17 @@ export default {
       this.selectedProblemIds.clear()
       this.selectedProblemEntries.splice(0, this.selectedProblemEntries.length)
     },
-    backToUserContestList: function () {
-      this.$router.replace("/user/" + this.$root.loginStatus.userid + "/contest/list")
+    backToContest: function () {
+      this.$router.replace("/contest/" + this.id)
     },
-    create: function () {
+    save: function () {
       let problemIds = []
-      for(let problemEntry of this.selectedProblemEntries) {
+      for (let problemEntry of this.selectedProblemEntries) {
         problemIds.push(problemEntry.id)
       }
-      axios.post("/contests", {
-        "name": this.name,
-        "type": this.type,
-        "description": this.description,
-        "passwordSet": this.passwordSet,
-        "password": this.password,
-        "startTime": this.time[0],
-        "endTime": this.time[1],
-        "problemIds": problemIds
-      }).then(() => {
-        this.$message.success("比赛创建成功")
-        this.saved = true
-        this.$router.push("/user/" + this.$root.loginStatus.userid + "/contest/list") // todo 跳转至创建的比赛页面
-      }).catch((error) => {
-        this.$message.error(error.response.data)
-      })
+
     },
-    createContest: function () {
+    saveContest: function () {
       if (this.name === "") {
         this.$message.error("比赛名不能为空")
         return
@@ -391,7 +403,7 @@ export default {
         }).then(() => {
           this.create()
         }).catch((action) => {
-          if(action === 'cancel') {
+          if (action === 'cancel') {
             this.activeName = "problemSet"
           }
         });
@@ -416,6 +428,50 @@ export default {
     }
   },
   mounted: function () {
+    this.loading = true
+    axios.get("/contests/" + this.id)
+        .then((response) => {
+          this.name = response.data.name
+          this.type = response.data.type
+          this.time = [new Date(response.data.startTime), new Date(response.data.endTime)]
+          let current = new Date()
+          if(current < this.time[0]) {
+            this.status = "before"
+          } else if(current >= this.time[1]) {
+            this.status = "after"
+          } else {
+            this.status = "ongoing"
+          }
+          this.description = response.data.description
+          this.passwordSet = response.data.passwordSet
+          this.loading = false
+          if (this.passwordSet) {
+            this.passwordLoading = true
+            axios.get("/contests/" + this.id + "/password")
+                .then((response) => {
+                  this.password = response.data
+                  this.passwordLoading = false
+                }).catch((error) => {
+              this.$message.error(error.response.data)
+              this.passwordLoading = false
+            })
+          }
+        }).catch((error) => {
+      this.$message.error(error.response.data)
+      this.loading = false
+    })
+    this.selectedProblemListLoading = true
+    axios.get("/contests/" + this.id + "/problemEntries")
+        .then((response) => {
+          this.selectedProblemEntries = response.data
+          for (let problemEntry of this.selectedProblemEntries) {
+            this.selectedProblemIds.add(problemEntry.id)
+          }
+          this.selectedProblemListLoading = false
+        }).catch((error) => {
+      this.$message.error(error.response.data)
+      this.selectedProblemListLoading = false
+    })
     this.update();
   }
 }

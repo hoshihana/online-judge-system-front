@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AboutView from "@/views/AboutView";
 import ProblemListView from "@/views/ProblemListView";
-import ProblemSetListView from "@/views/ProblemSetListView";
 import RecordListView from "@/views/RecordListView";
 import LoginView from "@/views/LoginView";
 import RegisterView from "@/views/RegisterView";
@@ -15,7 +14,10 @@ import UserHomeView from "@/views/UserHomeView";
 import UserProfileView from "@/views/UserProfileView";
 import UserProblemListView from "@/views/UserProblemListView";
 import RecordView from "@/views/RecordView";
-import contestCreateView from "@/views/ContestCreateView";
+import ContestCreateView from "@/views/ContestCreateView";
+import ContestListView from "@/views/ContestListView";
+import UserContestListView from "@/views/UserContestListView";
+import ContestEditView from "@/views/ContestEditView";
 
 Vue.use(VueRouter)
 
@@ -68,11 +70,6 @@ const routes = [
         props: true,
     },
     {
-        path: '/contest/new',
-        name: 'contestNew',
-        component: contestCreateView,
-    },
-    {
         path: '/user/:id',
         name: 'user',
         component: UserView,
@@ -95,13 +92,30 @@ const routes = [
                 name: 'userProblemList',
                 component: UserProblemListView,
                 props: true
-            }
+            },
+            {
+                path: 'contest/list',
+                name: 'userContestList',
+                component: UserContestListView,
+                props: true
+            },
         ]
     },
     {
-        path: '/problemSet/list',
-        name: 'problemSetList',
-        component: ProblemSetListView
+        path: '/contest/new',
+        name: 'contestNew',
+        component: ContestCreateView,
+    },
+    {
+        path: '/contest/:id/edit',
+        name: 'contest',
+        component: ContestEditView,
+        props: true
+    },
+    {
+        path: '/contest/list',
+        name: 'contestList',
+        component: ContestListView,
     },
     {
         path: '/record/list',

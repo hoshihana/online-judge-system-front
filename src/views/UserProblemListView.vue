@@ -1,8 +1,8 @@
 <template>
   <div>
-    <el-card body-style="padding-top: 2px">
+    <el-card body-style="padding-top: 5px">
       <el-table :data="problemEntries" stripe style="width: 100%">
-        <el-table-column label="题号" min-width="1">
+        <el-table-column label="#" min-width="1" align="center">
           <template #default="scope">
             <router-link class="el-link el-link--primary" :to="'/problem/' + scope.row.id">{{
                 scope.row.id
@@ -10,7 +10,7 @@
             </router-link>
           </template>
         </el-table-column>
-        <el-table-column min-width="5">
+        <el-table-column min-width="4">
           <template #header>
             题目名
             <el-input placeholder="题号/题目名" v-model="key" clearable size="medium" style="margin-left: 5%; width: 50%"
@@ -40,7 +40,7 @@
         </el-table-column>
         <el-table-column min-width="1" align="center">
           <template #header>
-            <el-dropdown trigger="click" :hide-on-click="false" placement="bottom">
+            <el-dropdown trigger="click" :hide-on-click="false" placement="bottom" style="cursor: pointer">
               <span :class="{'active-filter': showPrivate || showHidden || showPublic}">状态<i
                   class="el-icon-arrow-down el-icon--right"></i></span>
               <template #dropdown>
@@ -59,7 +59,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column min-width="2" align="center">
+        <el-table-column min-width="1" align="center">
           <template #header>
             <el-button type="primary" size="medium" plain @click="newProblem">
               <font-awesome-icon icon="fa-solid fa-plus"></font-awesome-icon>
@@ -67,7 +67,7 @@
             </el-button>
           </template>
           <template #default="scope">
-            <el-button style="padding: 0; min-height: 0" type="text" title="编辑" @click="editProblem(scope.row.id)">
+            <el-button class="edit-button" type="text" title="编辑" @click="editProblem(scope.row.id)">
               <el-badge is-dot :hidden="scope.row.testSet">
                 <font-awesome-icon icon="fa-solid fa-pen-to-square"></font-awesome-icon>
                 编辑
@@ -175,7 +175,7 @@ export default {
     },
     newProblem: function () {
       this.$router.push("/problem/new")
-    }
+    },
   },
   mounted() {
     this.update();
@@ -184,6 +184,11 @@ export default {
 </script>
 
 <style scoped>
+.edit-button {
+  padding: 0;
+  min-height: 0;
+}
+
 .active-filter {
   color: #409EFF;
 }
