@@ -151,8 +151,8 @@
             </el-table-column>
             <el-table-column label="时间" align="center" min-width="2">
               <template #default="scope">
-                {{ (new Date(scope.row.submitTime)).toLocaleDateString() }}<br>
-                {{ (new Date(scope.row.submitTime)).toLocaleTimeString() }}
+                {{ $moment(scope.row.submitTime).format("yyyy-MM-DD") }}<br>
+                {{ $moment(scope.row.submitTime).format("HH:mm:ss") }}
               </template>
             </el-table-column>
             <el-table-column label="结果" align="center" min-width="1">

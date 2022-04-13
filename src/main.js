@@ -42,10 +42,11 @@ import {
     faGears,
     faGrip,
     faCaretRight,
-    faAnglesLeft, faLock, faList
+    faAnglesLeft, faLock, faList, faHourglassStart, faHourglassEnd, faUsers, faScaleBalanced
 } from '@fortawesome/free-solid-svg-icons'
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import moment from 'moment'
 
 /* add icons to the library */
 library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
@@ -54,10 +55,13 @@ library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
     faCode, faAnglesUp, faHourglass, faBookmark, faRulerHorizontal, faHome, faBook,
     faCircleQuestion, faAngleLeft, faAngleRight, faClipboardList, faArrowPointer,
     faAnglesRight, faFileZipper, faBox, faHashtag, faCloudArrowDown, faArrowsRotate,
-    faGears, faGrip, faCaretRight, faAnglesLeft, faLock, faList)
+    faGears, faGrip, faCaretRight, faAnglesLeft, faLock, faList, faHourglassStart,
+    faHourglassEnd, faUsers, faScaleBalanced)
 
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
+Vue.prototype.$moment = moment
 
 Vue.config.productionTip = false
 

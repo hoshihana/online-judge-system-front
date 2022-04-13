@@ -9,25 +9,64 @@
               返回比赛
             </el-button>
           </el-col>
-          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛编辑：{{ id }} {{ name }}</b></el-col>
+          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛编辑：{{ id }} {{ name }}</b>
+          </el-col>
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch ref="table" v-model="activeName">
-        <el-tab-pane label="比赛编辑" name="contestEdit">
+        <el-tab-pane label="比赛详情" name="contestDetail">
+          <h3>比赛状态</h3>
+          <el-descriptions style="margin: 15px 15px 25px; width: 80%" :column="3" border>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-scale-balanced" fixed-width></font-awesome-icon>
+                状态
+              </template>
+              <el-tooltip :content="statusTipText" placement="top" effect="light">
+                <el-tag :type="statusTagType">{{ statusTagText }}</el-tag>
+              </el-tooltip>
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-hourglass-start" fixed-width></font-awesome-icon>
+                开始时间
+              </template>
+              {{ $moment(startTime).format("yyyy-MM-DD HH:mm") }}
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-hourglass-end" fixed-width></font-awesome-icon>
+                结束时间
+              </template>
+              {{ $moment(endTime).format("yyyy-MM-DD HH:mm") }}
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-hourglass" fixed-width></font-awesome-icon>
+                比赛时长
+              </template>
+              {{ formatTimeInterval(endTime - startTime) }}
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-users" fixed-width></font-awesome-icon>
+                参加人数
+              </template>
+              {{ status === "before" ? "--" : participantAmount }}
+            </el-descriptions-item>
+            <el-descriptions-item>
+              <template slot="label">
+                <font-awesome-icon icon="fa-solid fa-list" fixed-width></font-awesome-icon>
+                题目数
+              </template>
+              {{ problemAmount === 0 ? "--" : problemAmount }}
+            </el-descriptions-item>
+          </el-descriptions>
           <h3>比赛名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="比赛名" maxlength="40" show-word-limit
-                    style="width: 45%; margin: 15px"></el-input>
-          <h3>
-            <span style="line-height: 32px">比赛时间<b style="color: #F56C6C">*</b></span>
-            <el-tag style="margin-left: 20px" :type="getStatusTagType()">{{this.getStatusTagText()}}</el-tag>
-          </h3>
-          <el-date-picker style="margin: 15px"
-                          v-model="time"
-                          type="datetimerange"
-                          start-placeholder="比赛开始时间"
-                          end-placeholder="比赛结束时间"></el-date-picker>
+                    style="width: 45%; margin: 15px 15px 25px"></el-input>
           <h3>比赛类型</h3>
-          <div style="margin: 15px">
+          <div style="margin: 15px 15px 25px">
             <el-radio-group v-model="type">
               <el-radio label="COMP">竞赛</el-radio>
               <el-radio label="PRAC">练习</el-radio>
@@ -39,18 +78,21 @@
           <h3 style="margin-top: 30px">参赛设置</h3>
           <div style="margin: 15px">
             <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"></el-switch>
-            <el-input v-if="passwordSet" v-loading="passwordLoading" type="password" placeholder="6到16位的数字或字母"
-                      v-model="password" show-password
+            <el-input v-if="passwordSet" type="password" placeholder="密码：6到16位的数字或字母" v-model="password" show-password
                       style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="createContest">
-              <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
-              创建
+            <el-button type="warning" size="medium" style="margin: 10px" plain @click="activeName = 'problemList'">
+              <font-awesome-icon icon="fa-solid fa-list"></font-awesome-icon>
+              题目配置
+            </el-button>
+            <el-button type="primary" size="medium" style="margin: 10px 20px 10px 10px" plain @click="saveContest">
+              <font-awesome-icon icon="fa-solid fa-floppy-disk" fixed-width></font-awesome-icon>
+              保存
             </el-button>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="题目配置" name="problemSet">
+        <el-tab-pane label="题目列表" name="problemList">
           <el-row type="flex">
             <el-col :span="13">
               <h3>
@@ -209,7 +251,7 @@ export default {
       selectedProblemListLoading: false,
       problemListLoading: false,
       saved: false,
-      activeName: "contestEdit",
+      activeName: "contestDetail",
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -245,11 +287,19 @@ export default {
         subfield: true, // 单双栏模式
         preview: true, // 预览
       },
+      authorId: null,
+      authorUsername: "",
       name: "",
       type: "COMP",
       time: null,
+      startTime: null,
+      endTime: null,
+      current: null,
+      timer: null,
       status: "before",
       description: "",
+      problemAmount: null,
+      participantAmount: null,
       passwordSet: false,
       password: "",
       key: "",
@@ -260,6 +310,35 @@ export default {
       selectedProblemEntries: [],
       selectedProblemIds: new Set(),
     }
+  },
+  computed: {
+    statusTagType: function () {
+      if (this.status === "before") {
+        return ""
+      } else if (this.status === "after") {
+        return "info"
+      } else {
+        return "success"
+      }
+    },
+    statusTagText: function () {
+      if (this.status === "before") {
+        return "未开始"
+      } else if (this.status === "after") {
+        return "已结束"
+      } else {
+        return "进行中"
+      }
+    },
+    statusTipText: function () {
+      if (this.status === "before") {
+        return "距离比赛开始还有：" + this.formatTimeInterval(this.startTime - this.current)
+      } else if (this.status === "after") {
+        return "比赛已结束"
+      } else {
+        return "距离比赛结束还有：" + this.formatTimeInterval(this.endTime - this.current)
+      }
+    },
   },
   methods: {
     update: function () {
@@ -299,22 +378,27 @@ export default {
           return "success"
       }
     },
-    getStatusTagType: function () {
-      if (this.status === "before") {
-        return ""
-      } else if (this.status === "after") {
-        return "info"
-      } else {
-        return "success"
+    formatTimeInterval: function (interval) {
+      let result = ""
+      if (interval > 24 * 60 * 60 * 1000) {
+        result += Math.floor(interval / (24 * 60 * 60 * 1000)).toString() + "天 "
+        interval %= 24 * 60 * 60 * 1000
       }
+      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "小时 "
+      interval %= 60 * 60 * 1000
+      result += Math.floor(interval / (60 * 1000)).toString() + "分 "
+      interval %= 60 * 1000
+      result += Math.floor(interval / 1000).toString() + "秒"
+      return result
     },
-    getStatusTagText: function () {
-      if (this.status === "before") {
-        return "未开始"
-      } else if (this.status === "after") {
-        return "已结束"
+    updateStatus: function () {
+      this.current = new Date()
+      if (this.current < this.startTime) {
+        this.status = "before"
+      } else if (this.current >= this.endTime) {
+        this.status = "after"
       } else {
-        return "进行中"
+        this.status = "ongoing"
       }
     },
     select: function (problemEntry) {
@@ -377,14 +461,6 @@ export default {
         this.$message.error("比赛时间不能为空")
         return
       }
-      if (this.time[0].getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
-        this.$message.error("比赛开始时间必须至少在当前时间的5分钟之后")
-        return
-      }
-      if (this.time[0] >= this.time[1]) {
-        this.$message.error("比赛结束时间必须在开始时间之后")
-        return
-      }
       if (this.passwordSet) {
         if (this.password === "") {
           this.$message.error("参赛密码不能为空")
@@ -395,20 +471,22 @@ export default {
           return
         }
       }
-      if (this.selectedProblemEntries.length === 0) {
-        this.$confirm('该比赛尚未配置题目列表，是否继续创建？', '确认信息', {
-          distinguishCancelAndClose: true,
-          confirmButtonText: '确定',
-          cancelButtonText: '前往配置'
-        }).then(() => {
+      if (this.status === "before") {
+        if (this.selectedProblemEntries.length === 0) {
+          this.$confirm('该比赛尚未配置题目列表，是否继续创建？', '确认信息', {
+            distinguishCancelAndClose: true,
+            confirmButtonText: '确定',
+            cancelButtonText: '前往配置'
+          }).then(() => {
+            this.create()
+          }).catch((action) => {
+            if (action === 'cancel') {
+              this.activeName = "problemSet"
+            }
+          });
+        } else {
           this.create()
-        }).catch((action) => {
-          if (action === 'cancel') {
-            this.activeName = "problemSet"
-          }
-        });
-      } else {
-        this.create()
+        }
       }
     }
   },
@@ -416,7 +494,7 @@ export default {
     if (this.saved) {
       next()
     } else {
-      this.$confirm('创建的比赛尚未保存，是否继续离开？', '确认信息', {
+      this.$confirm('可能存在尚未保存内容，是否继续离开？', '确认信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -431,18 +509,17 @@ export default {
     this.loading = true
     axios.get("/contests/" + this.id)
         .then((response) => {
+          this.authorId = response.data.authorId
+          this.authorUsername = response.data.authorUsername
           this.name = response.data.name
           this.type = response.data.type
-          this.time = [new Date(response.data.startTime), new Date(response.data.endTime)]
-          let current = new Date()
-          if(current < this.time[0]) {
-            this.status = "before"
-          } else if(current >= this.time[1]) {
-            this.status = "after"
-          } else {
-            this.status = "ongoing"
-          }
+          this.startTime = new Date(response.data.startTime)
+          this.endTime = new Date(response.data.endTime)
+          this.updateStatus()
+          this.timer = setInterval(this.updateStatus, 500)
           this.description = response.data.description
+          this.problemAmount = response.data.problemAmount
+          this.participantAmount = response.data.participantAmount
           this.passwordSet = response.data.passwordSet
           this.loading = false
           if (this.passwordSet) {
@@ -473,6 +550,9 @@ export default {
       this.selectedProblemListLoading = false
     })
     this.update();
+  },
+  destroyed: function () {
+    clearInterval(this.timer)
   }
 }
 </script>

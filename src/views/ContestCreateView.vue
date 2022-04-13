@@ -13,20 +13,23 @@
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch ref="table" v-model="activeName">
-        <el-tab-pane label="比赛编辑" name="contestEdit">
+        <el-tab-pane label="比赛详情" name="contestDetail">
           <h3>比赛名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="比赛名" maxlength="40" show-word-limit
-                    style="width: 45%; margin: 15px"></el-input>
+                    style="width: 45%; margin: 15px 15px 25px;"></el-input>
           <h3>
             比赛时间<b style="color: #F56C6C">*</b>
           </h3>
-          <el-date-picker style="margin: 15px"
+          <el-date-picker style="margin: 15px 15px 25px"
                           v-model="time"
                           type="datetimerange"
+                          format="yyyy/MM/dd HH:mm"
+                          :picker-options="timePickerOptions"
+                          @change="checkTime"
                           start-placeholder="比赛开始时间"
                           end-placeholder="比赛结束时间"></el-date-picker>
           <h3>比赛类型</h3>
-          <div style="margin: 15px">
+          <div style="margin: 15px 15px 25px">
             <el-radio-group v-model="type">
               <el-radio label="COMP">竞赛</el-radio>
               <el-radio label="PRAC">练习</el-radio>
@@ -38,17 +41,21 @@
           <h3 style="margin-top: 30px">参赛设置</h3>
           <div style="margin: 15px">
             <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"></el-switch>
-            <el-input v-if="passwordSet" type="password" placeholder="6到16位的数字或字母" v-model="password" show-password
+            <el-input v-if="passwordSet" type="password" placeholder="密码：6到16位的数字或字母" v-model="password" show-password
                       style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="createContest">
+            <el-button type="warning" size="medium" style="margin: 10px" plain @click="activeName = 'problemList'">
+              <font-awesome-icon icon="fa-solid fa-list"></font-awesome-icon>
+              题目配置
+            </el-button>
+            <el-button type="primary" size="medium" style="margin: 10px 20px 10px 10px" plain @click="createContest">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
               创建
             </el-button>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="题目配置" name="problemSet">
+        <el-tab-pane label="题目列表" name="problemList">
           <el-row type="flex">
             <el-col :span="13">
               <h3>
@@ -201,7 +208,12 @@ export default {
     return {
       loading: false,
       saved: false,
-      activeName: "contestEdit",
+      activeName: "contestDetail",
+      timePickerOptions: {
+        disabledDate: (time) => {
+          return time.getTime() < new Date().getTime() - 24 * 60 * 60 * 1000
+        }
+      },
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -334,6 +346,15 @@ export default {
     backToUserContestList: function () {
       this.$router.replace("/user/" + this.$root.loginStatus.userid + "/contest/list")
     },
+    checkTime: function (time) {
+      if (time[0].getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
+        this.$message.error("比赛开始时间必须至少在当前时间的5分钟之后")
+        this.time = null
+      } else if (time[0] >= time[1]) {
+        this.$message.error("比赛结束时间必须在开始时间之后")
+        this.time = null
+      }
+    },
     create: function () {
       let problemIds = []
       for(let problemEntry of this.selectedProblemEntries) {
@@ -384,17 +405,13 @@ export default {
         }
       }
       if (this.selectedProblemEntries.length === 0) {
-        this.$confirm('该比赛尚未配置题目列表，是否继续创建？', '确认信息', {
+        this.$confirm('该比赛的题目列表为空，是否继续创建？', '确认信息', {
           distinguishCancelAndClose: true,
           confirmButtonText: '确定',
-          cancelButtonText: '前往配置'
+          cancelButtonText: '取消'
         }).then(() => {
           this.create()
-        }).catch((action) => {
-          if(action === 'cancel') {
-            this.activeName = "problemSet"
-          }
-        });
+        })
       } else {
         this.create()
       }
