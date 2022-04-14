@@ -8,6 +8,36 @@
               <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
               返回比赛
             </el-button>
+            <el-button v-if="status !== 'before'" type="warning" size="medium" plain @click="showResetContestDialog = true">
+              <font-awesome-icon icon="fa-solid fa-clock-rotate-left" fixed-width></font-awesome-icon> 重置比赛
+            </el-button>
+            <el-dialog :visible.sync="showResetContestDialog" width="40%" :destroy-on-close="true" @open="pickedTime=[startTime, endTime]">
+              <template #title>
+                <font-awesome-icon icon="fa-solid fa-clock-rotate-left" fixed-width></font-awesome-icon> 重置比赛
+              </template>
+              <div style="font-size: medium; margin-bottom: 10px">
+                <b>比赛时间</b>
+              </div>
+              <div style="margin: 0 15px">
+                <div style="font-size: small; color: #909399; margin-bottom: 10px">比赛开始时间必须至少在当前时间的5分钟之后，结束时间必须在开始时间之后</div>
+                <el-date-picker style="width: 90%"
+                                v-model="pickedTime"
+                                type="datetimerange"
+                                format="yyyy/MM/dd HH:mm"
+                                :picker-options="timePickerOptions"
+                                start-placeholder="比赛开始时间"
+                                end-placeholder="比赛结束时间"></el-date-picker>
+              </div>
+              <div style="font-size: medium; color: #F56C6C; margin-top: 25px; text-align: center">
+                <i class="el-icon-warning"></i> 注意：重置比赛将会删除该比赛的所有参赛记录和提交记录
+              </div>
+              <template #footer>
+                <div>
+                  <el-button size="medium" plain @click="showResetContestDialog = false">取消</el-button>
+                  <el-button type="primary" size="medium" plain @click="resetContest">确定</el-button>
+                </div>
+              </template>
+            </el-dialog>
           </el-col>
           <el-col :span="16" style="text-align: right"><b style="font-size: x-large">比赛编辑：{{ id }} {{ name }}</b>
           </el-col>
@@ -15,7 +45,84 @@
       </template>
       <el-tabs tab-position="left" stretch ref="table" v-model="activeName">
         <el-tab-pane label="比赛详情" name="contestDetail">
-          <h3>比赛状态</h3>
+          <el-alert
+              type="info"
+              :style="{margin: '15px 15px 25px', width: '80%', 'background-color': statusBgColor, 'color': statusColor}"
+              :closable="false"
+              show-icon>
+            <template #title>
+              <div class="title-div">
+                {{ statusTipText }}
+              </div>
+            </template>
+            <div class="description-div" :style="{color: statusColor}">
+              <span v-if="status === 'before'">
+                比赛尚未开始，各项内容均可作修改
+              </span>
+              <span v-if="status === 'ongoing'">
+                比赛正在进行中，无法修改题目列表，如有需要请“重置比赛”
+              </span>
+              <span v-if="status === 'after'">
+                比赛已经结束，无法修改比赛信息和题目列表，如有需要请“修改比赛结束时间”或“重置比赛”
+              </span>
+            </div>
+          </el-alert>
+          <h3>
+            比赛状态
+            <el-button v-if="status === 'before'" type="primary" size="medium" plain style="margin: 0 10px"
+                       @click="showUpdateTimeDialog = true">
+              <font-awesome-icon icon="fa-solid fa-pen" fixed-width></font-awesome-icon>
+              修改比赛时间
+            </el-button>
+            <el-dialog :visible.sync="showUpdateTimeDialog" width="40%" :destroy-on-close="true" @open="pickedTime=[startTime, endTime]">
+              <template #title>
+                <font-awesome-icon icon="fa-solid fa-pen" fixed-width></font-awesome-icon>
+                修改比赛时间
+              </template>
+              <div style="margin: 0 15px">
+                <div style="font-size: small; color: #909399; margin-bottom: 10px">比赛开始时间必须至少在当前时间的5分钟之后，结束时间必须在开始时间之后</div>
+                <el-date-picker style="width: 90%"
+                                v-model="pickedTime"
+                                type="datetimerange"
+                                format="yyyy/MM/dd HH:mm"
+                                :picker-options="timePickerOptions"
+                                start-placeholder="比赛开始时间"
+                                end-placeholder="比赛结束时间"></el-date-picker>
+              </div>
+              <template #footer>
+                <div>
+                  <el-button size="medium" plain @click="showUpdateTimeDialog = false">取消</el-button>
+                  <el-button type="primary" size="medium" plain @click="updateTime">确定</el-button>
+                </div>
+              </template>
+            </el-dialog>
+            <el-button v-if="status !== 'before'" type="primary" size="medium" plain style="margin: 0 10px"
+                       @click="showUpdateEndTimeDialog = true">
+              <font-awesome-icon icon="fa-solid fa-pen" fixed-width></font-awesome-icon>
+              修改结束时间
+            </el-button>
+            <el-dialog :visible.sync="showUpdateEndTimeDialog" width="40%" :destroy-on-close="true" @open="pickedEndtime = endTime">
+              <template #title>
+                <font-awesome-icon icon="fa-solid fa-pen" fixed-width></font-awesome-icon>
+                修改结束时间
+              </template>
+              <div style="margin: 0 15px">
+                <div style="font-size: small; color: #909399; margin-bottom: 10px">比赛结束时间必须至少在当前时间的5分钟之后</div>
+                <el-date-picker style="width: 90%"
+                                v-model="pickedEndtime"
+                                type="datetime"
+                                format="yyyy/MM/dd HH:mm"
+                                :picker-options="timePickerOptions"
+                                placeholder="比赛结束时间"></el-date-picker>
+              </div>
+              <template #footer>
+                <div>
+                  <el-button size="medium" plain @click="showUpdateEndTimeDialog = false">取消</el-button>
+                  <el-button type="primary" size="medium" plain @click="updateEndTime">确定</el-button>
+                </div>
+              </template>
+            </el-dialog>
+          </h3>
           <el-descriptions style="margin: 15px 15px 25px; width: 80%" :column="3" border>
             <el-descriptions-item>
               <template slot="label">
@@ -42,7 +149,7 @@
             </el-descriptions-item>
             <el-descriptions-item>
               <template slot="label">
-                <font-awesome-icon icon="fa-solid fa-hourglass" fixed-width></font-awesome-icon>
+                <font-awesome-icon icon="fa-solid fa-stopwatch" fixed-width></font-awesome-icon>
                 比赛时长
               </template>
               {{ formatTimeInterval(endTime - startTime) }}
@@ -50,49 +157,71 @@
             <el-descriptions-item>
               <template slot="label">
                 <font-awesome-icon icon="fa-solid fa-users" fixed-width></font-awesome-icon>
-                参加人数
+                参加人数<!--todo 增加查看按钮-->
               </template>
               {{ status === "before" ? "--" : participantAmount }}
             </el-descriptions-item>
             <el-descriptions-item>
               <template slot="label">
                 <font-awesome-icon icon="fa-solid fa-list" fixed-width></font-awesome-icon>
-                题目数
+                题目数<!--todo 增加查看题目按钮-->
               </template>
               {{ problemAmount === 0 ? "--" : problemAmount }}
             </el-descriptions-item>
           </el-descriptions>
           <h3>比赛名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="比赛名" maxlength="40" show-word-limit
-                    style="width: 45%; margin: 15px 15px 25px"></el-input>
+                    style="width: 45%; margin: 15px 15px 25px" :readonly="status === 'after'"></el-input>
           <h3>比赛类型</h3>
           <div style="margin: 15px 15px 25px">
-            <el-radio-group v-model="type">
+            <el-radio-group v-model="type" :disabled="status === 'after'">
               <el-radio label="COMP">竞赛</el-radio>
               <el-radio label="PRAC">练习</el-radio>
             </el-radio-group>
           </div>
           <h3>比赛描述</h3>
-          <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}"
-                        style="margin: 15px; min-height: 400px"></mavon-editor>
+          <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}" :autofocus="false"
+                        :editable="status !== 'after'" style="margin: 15px; min-height: 400px"></mavon-editor>
           <h3 style="margin-top: 30px">参赛设置</h3>
           <div style="margin: 15px">
-            <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"></el-switch>
-            <el-input v-if="passwordSet" type="password" placeholder="密码：6到16位的数字或字母" v-model="password" show-password
+            <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"
+                       :disabled="status === 'after'"></el-switch>
+            <el-input v-if="passwordSet" type="password" placeholder="密码：6到16位的数字或字母" v-model="password"
+                      :readonly="status === 'after'" show-password
                       style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
-            <el-button type="warning" size="medium" style="margin: 10px" plain @click="activeName = 'problemList'">
-              <font-awesome-icon icon="fa-solid fa-list"></font-awesome-icon>
-              题目配置
-            </el-button>
-            <el-button type="primary" size="medium" style="margin: 10px 20px 10px 10px" plain @click="saveContest">
-              <font-awesome-icon icon="fa-solid fa-floppy-disk" fixed-width></font-awesome-icon>
-              保存
-            </el-button>
+            <el-tooltip placement="top" :disabled="status === 'before'">
+              <template #content>
+                <span v-if="status === 'ongoing'">
+                  比赛进行中，无法修改题目列表
+                </span>
+                <span v-if="status === 'after'">
+                  比赛已结束，无法修改题目列表
+                </span>
+              </template>
+              <div style="display: inline-block; margin: 10px;">
+                <el-button type="warning" size="medium" plain @click="activeName = 'problemList'"
+                           :disabled="status !== 'before'">
+                  <font-awesome-icon icon="fa-solid fa-list"></font-awesome-icon>
+                  题目配置
+                </el-button>
+              </div>
+            </el-tooltip>
+            <el-tooltip placement="top" :disabled="status !== 'after'">
+              <template #content>
+                比赛已结束，无法修改比赛信息
+              </template>
+              <div style="display:inline-block; margin: 10px 20px 10px 10px">
+                <el-button type="primary" size="medium" plain @click="updateContest" :disabled="status === 'after'">
+                  <font-awesome-icon icon="fa-solid fa-floppy-disk" fixed-width></font-awesome-icon>
+                  保存
+                </el-button>
+              </div>
+            </el-tooltip>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="题目列表" name="problemList">
+        <el-tab-pane label="题目列表" name="problemList" :disabled="status !== 'before'">
           <el-row type="flex">
             <el-col :span="13">
               <h3>
@@ -220,7 +349,8 @@
             </el-col>
           </el-row>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="saveContest">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="updateContest"
+                       :disabled="status !== 'before'">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
               保存
             </el-button>
@@ -252,6 +382,16 @@ export default {
       problemListLoading: false,
       saved: false,
       activeName: "contestDetail",
+      statusBgColor: "",
+      statusColor: "",
+      showUpdateTimeDialog: false,
+      showUpdateEndTimeDialog: false,
+      showResetContestDialog: false,
+      timePickerOptions: {
+        disabledDate: (time) => {
+          return time.getTime() < new Date().getTime() - 24 * 60 * 60 * 1000
+        }
+      },
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -291,7 +431,8 @@ export default {
       authorUsername: "",
       name: "",
       type: "COMP",
-      time: null,
+      pickedTime: null,
+      pickedEndtime: null,
       startTime: null,
       endTime: null,
       current: null,
@@ -384,7 +525,7 @@ export default {
         result += Math.floor(interval / (24 * 60 * 60 * 1000)).toString() + "天 "
         interval %= 24 * 60 * 60 * 1000
       }
-      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "小时 "
+      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "时 "
       interval %= 60 * 60 * 1000
       result += Math.floor(interval / (60 * 1000)).toString() + "分 "
       interval %= 60 * 1000
@@ -395,10 +536,16 @@ export default {
       this.current = new Date()
       if (this.current < this.startTime) {
         this.status = "before"
+        this.statusBgColor = "rgb(236,245,255)"
+        this.statusColor = "#409EFF"
       } else if (this.current >= this.endTime) {
         this.status = "after"
+        this.statusBgColor = "rgb(244,244,245)"
+        this.statusColor = "#909399"
       } else {
         this.status = "ongoing"
+        this.statusBgColor = "rgb(240,249,235)"
+        this.statusColor = "#67C23A"
       }
     },
     select: function (problemEntry) {
@@ -445,20 +592,51 @@ export default {
     backToContest: function () {
       this.$router.replace("/contest/" + this.id)
     },
-    save: function () {
+    updateOngoingContest: function () {
+      axios.patch("/contests/" + this.id + "/detail", {
+        "name": this.name,
+        "type": this.type,
+        "description": this.description,
+        "passwordSet": this.passwordSet,
+        "password": this.password,
+      }).then(() => {
+        this.$message.success("比赛编辑成功")
+        this.saved = true
+        this.backToContest()
+      }).catch((error) => {
+        this.$message.error(error.response.data)
+      })
+    },
+    updateBeforeContest: function () {
       let problemIds = []
       for (let problemEntry of this.selectedProblemEntries) {
         problemIds.push(problemEntry.id)
       }
-
+      axios.patch("/contests/" + this.id + "/detail", {
+        "name": this.name,
+        "type": this.type,
+        "description": this.description,
+        "passwordSet": this.passwordSet,
+        "password": this.password,
+      }).then(() => {
+        axios.post("/contests/" + this.id + "/problems", {
+          "problemIds": problemIds
+        }).then(() => {
+          this.$message.success("比赛编辑成功")
+          this.saved = true
+          this.backToContest()
+        }).catch((error) => {
+          this.$message.error(error.response.data)
+          this.saved = true
+          this.backToContest()
+        })
+      }).catch((error) => {
+        this.$message.error(error.response.data)
+      })
     },
-    saveContest: function () {
+    updateContest: function () {
       if (this.name === "") {
         this.$message.error("比赛名不能为空")
-        return
-      }
-      if (this.time === null) {
-        this.$message.error("比赛时间不能为空")
         return
       }
       if (this.passwordSet) {
@@ -476,17 +654,74 @@ export default {
           this.$confirm('该比赛尚未配置题目列表，是否继续创建？', '确认信息', {
             distinguishCancelAndClose: true,
             confirmButtonText: '确定',
-            cancelButtonText: '前往配置'
+            cancelButtonText: '取消'
           }).then(() => {
-            this.create()
-          }).catch((action) => {
-            if (action === 'cancel') {
-              this.activeName = "problemSet"
-            }
-          });
+            this.updateBeforeContest()
+          })
         } else {
-          this.create()
+          this.updateBeforeContest()
         }
+      } else {
+        this.updateOngoingContest()
+      }
+    },
+    updateTime: function () {
+      if(this.pickedTime === null) {
+        this.$message.error("比赛时间不能为空")
+      } if (this.pickedTime[0].getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
+        this.$message.error("比赛开始时间必须至少在当前时间的5分钟之后")
+      } else if (this.pickedTime[0] >= this.pickedTime[1]) {
+        this.$message.error("比赛结束时间必须在开始时间之后")
+      } else {
+        axios.patch("/contests/" + this.id + "/time", {
+          "startTime": this.pickedTime[0],
+          "endTime": this.pickedTime[1]
+        }).then(() => {
+          this.showUpdateTimeDialog = false
+          this.startTime = this.pickedTime[0]
+          this.endTime = this.pickedTime[1]
+          this.$message.success("比赛时间修改成功")
+        }).catch((error) => {
+          this.$message.error(error.response.data)
+        })
+      }
+    },
+    updateEndTime: function () {
+      if(this.pickedEndtime === null) {
+        this.$message.error("比赛结束时间不能为空")
+      } else if (this.pickedEndtime.getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
+        this.$message.error("比赛结束时间必须至少在当前时间的5分钟之后")
+      } else {
+        axios.patch("/contests/" + this.id + "/endTime", {
+          "endTime": this.pickedEndtime
+        }).then(() => {
+          this.showUpdateEndTimeDialog = false
+          this.endTime = this.pickedEndtime
+          this.$message.success("比赛结束时间修改成功")
+        }).catch((error) => {
+          this.$message.error(error.response.data)
+        })
+      }
+    },
+    resetContest: function () {
+      if(this.pickedTime === null) {
+        this.$message.error("比赛时间不能为空")
+      } if (this.pickedTime[0].getTime() - new Date().getTime() < (4 * 60 + 30) * 1000) {
+        this.$message.error("比赛开始时间必须至少在当前时间的5分钟之后")
+      } else if (this.pickedTime[0] >= this.pickedTime[1]) {
+        this.$message.error("比赛结束时间必须在开始时间之后")
+      } else {
+        axios.post("/contests/" + this.id + "/reset", {
+          "startTime": this.pickedTime[0],
+          "endTime": this.pickedTime[1]
+        }).then(() => {
+          this.showUpdateTimeDialog = false
+          this.$message.success("比赛重置成功")
+          this.saved = true
+          this.backToContest()
+        }).catch((error) => {
+          this.$message.error(error.response.data)
+        })
       }
     }
   },
@@ -568,6 +803,17 @@ export default {
 
 .drag-ghost {
   opacity: 40%;
+}
+
+
+.title-div {
+  padding: 5px;
+  font-size: medium;
+}
+
+.description-div {
+  padding: 5px;
+  font-size: small;
 }
 
 .selected-number {

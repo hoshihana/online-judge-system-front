@@ -37,7 +37,7 @@
           <mavon-editor v-model="description" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
           <br>
           <h3>输入格式</h3>
-          <mavon-editor v-model="inputFormat" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px; z-index: inherit"></mavon-editor>
+          <mavon-editor v-model="inputFormat" :toolbars="toolbars" :xssOptions="{}" style="margin: 15px"></mavon-editor>
           <br>
           <h3>输出格式</h3>
           <mavon-editor v-model="outputFormat" :toolbars="toolbars" :xssOptions="{}"

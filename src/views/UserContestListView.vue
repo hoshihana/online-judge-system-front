@@ -19,7 +19,7 @@
         </el-table-column>
         <el-table-column min-width="50">
           <template #header>
-            题目名
+            比赛名
             <el-input placeholder="比赛号/比赛名" v-model="key" clearable size="medium" style="margin-left: 5%; width: 50%"
                       maxlength="40">
             </el-input>
@@ -139,7 +139,7 @@ export default {
         result += Math.floor(interval / (24 * 60 * 60 * 1000)).toString() + "天 "
         interval %= 24 * 60 * 60 * 1000
       }
-      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "小时 "
+      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "时 "
       interval %= 60 * 60 * 1000
       result += Math.floor(interval / (60 * 1000)).toString() + "分 "
       interval %= 60 * 1000
