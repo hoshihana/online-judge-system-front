@@ -3,7 +3,7 @@
     <el-container>
       <el-header height="210px">
         <el-card body-style="padding: 0">
-          <el-row style="background-color: #909399; padding: 20px">
+          <el-row style="padding: 20px" class="user-card">
             <el-col :span="12" style="text-align: left">
               <el-avatar :size="100">
                 <font-awesome-icon icon="fa-solid fa-user" size="2x"></font-awesome-icon>
@@ -44,5 +44,7 @@ export default {
 </script>
 
 <style scoped>
-
+.user-card {
+  background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
+}
 </style>

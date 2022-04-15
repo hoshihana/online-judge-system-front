@@ -1,14 +1,14 @@
 <template>
   <div id="app">
     <el-container style="height: 100%;">
-      <el-aside width="auto">
+      <el-aside width="auto" class="side-bar-shadow">
         <side-nav-bar></side-nav-bar>
       </el-aside>
       <el-container>
-        <el-header height="50px">
+        <el-header height="50px" style="padding: 0">
           <top-bar></top-bar>
         </el-header>
-        <el-main class="back-top-target" style="height: 100%; background-color: #EBEEF5">
+        <el-main class="back-top-target" style="height: 100%; background-image: linear-gradient(to top, #dfe9f3 0%, white 100%);">
           <router-view></router-view>
         </el-main>
         <el-backtop target=".back-top-target" :bottom="100" :right="20"></el-backtop>

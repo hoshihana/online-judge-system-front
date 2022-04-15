@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%">
-    <el-row type="flex" justify="end" align="middle" style="height: 100%">
+    <el-row type="flex" justify="end" align="middle" style="height: 100%; padding: 0 20px; box-shadow: 0 2px 10px 0 rgb(164,164,164, 0.3);">
       <el-button-group v-if="unlogin" style="font-size: small">
         <el-button type="primary" size="mini" @click="$router.push('/login')">登录</el-button>
         <el-button size="mini" @click="$router.push('/register')">注册</el-button>
