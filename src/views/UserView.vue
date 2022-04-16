@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-container>
-      <el-header height="210px">
+      <el-header height="auto">
         <el-card body-style="padding: 0">
           <el-row style="padding: 20px" class="user-card">
             <el-col :span="12" style="text-align: left">

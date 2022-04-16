@@ -19,6 +19,7 @@ import ContestListView from "@/views/ContestListView";
 import UserContestListView from "@/views/UserContestListView";
 import ContestEditView from "@/views/ContestEditView";
 import ContestView from "@/views/ContestView";
+import ContestDetailView from "@/views/ContestDetailView";
 
 Vue.use(VueRouter)
 
@@ -124,7 +125,12 @@ const routes = [
         component: ContestView,
         props: true,
         children: [
-
+            {
+                path: '',
+                name: 'contestDetail',
+                component: ContestDetailView,
+                props: true
+            },
         ]
     },
     {

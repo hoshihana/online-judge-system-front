@@ -1,37 +1,37 @@
 <template>
   <div>
     <el-container>
-      <el-header v-loading="loading" height="210px">
+      <el-header v-loading="loading" height="auto">
         <el-card body-style="padding: 0">
           <el-row style="padding: 20px;" class="contest-card" type="flex">
             <el-col :span="18">
               <div style="margin-left: 10px">
-                <el-tag effect="dark" :type="getTypeTagType(type)" class="type-tag">{{ getTypeTagText(type) }}</el-tag>
-                <b style="line-height: 55px; font-size: x-large">{{ id + " " + name }}</b>
-                <el-tooltip v-if="passwordSet" content="需要参赛密码" placement="right">
+                <el-tag effect="dark" :type="getTypeTagType(contest.type)" class="type-tag">{{ getTypeTagText(contest.type) }}</el-tag>
+                <b style="line-height: 55px; font-size: x-large">{{ contest.id + " " + contest.name }}</b>
+                <el-tooltip v-if="contest.passwordSet" content="需要参赛密码" placement="right">
                   <font-awesome-icon style="margin-left: 15px; margin-bottom: 2px" size="lg" color="rgb(144,147,153)" icon="fa-solid fa-lock"/>
                 </el-tooltip>
               </div>
               <div style="margin: 20px 30px; color: #606266">
                 <font-awesome-icon icon="fa-solid fa-calendar-days" fixed-width></font-awesome-icon>
-                比赛时间：{{ $moment(startTime).format("yyyy-MM-DD HH:mm") }} 至
-                {{ $moment(endTime).format("yyyy-MM-DD HH:mm") }}
+                比赛时间：{{ $moment(contest.startTime).format("yyyy-MM-DD HH:mm") }} 至
+                {{ $moment(contest.endTime).format("yyyy-MM-DD HH:mm") }}
               </div>
               <div style="margin: 20px 30px 10px; color: #606266">
                 <font-awesome-icon icon="fa-solid fa-stopwatch" fixed-width></font-awesome-icon>
-                比赛时长：{{ formatTimeInterval(endTime - startTime) }}
+                比赛时长：{{ formatTimeInterval(contest.endTime - contest.startTime) }}
               </div>
             </el-col>
             <el-col :span="6" style="position: relative">
               <div style="position: absolute; bottom: 0; right: 0; color: #606266;">
                 <div style="display: inline-block; text-align: center; padding: 0 20px">
                   <span style="line-height: 2">参加人数</span><br>
-                  <b>{{ participantAmount }}</b>
+                  <b>{{ contest.participantAmount }}</b>
                 </div>
                 <div class="vertical-divider"></div>
                 <div style="display: inline-block; text-align: center; padding: 0 20px;">
                   <span style="line-height: 2">题目数</span><br>
-                  <b>{{ problemAmount }}</b>
+                  <b>{{ contest.problemAmount }}</b>
                 </div>
               </div>
             </el-col>
@@ -39,9 +39,9 @@
           <el-row style="padding: 0 10px" type="flex" align="middle">
             <el-col :span="18">
               <el-menu :default-active="$route.fullPath" mode="horizontal" router>
-                <el-menu-item>比赛详情</el-menu-item>
-                <el-menu-item>题目列表</el-menu-item>
-                <el-menu-item>我的题目</el-menu-item>
+                <el-menu-item :index="basePath">比赛详情</el-menu-item>
+                <el-menu-item :index="basePath + '/problem/list'">题目列表</el-menu-item>
+                <el-menu-item>题目...</el-menu-item>
                 <el-menu-item>提交记录</el-menu-item>
                 <el-menu-item>排行榜</el-menu-item>
               </el-menu>
@@ -70,19 +70,28 @@ export default {
   data: function () {
     return {
       loading: false,
-      authorId: null,
-      authorUsername: "",
-      name: "",
-      type: "COMP",
-      startTime: null,
-      endTime: null,
+      isAuthor: false,
+      contest: {
+        id: null,
+        authorId: null,
+        authorUsername: "",
+        name: "",
+        type: "COMP",
+        startTime: null,
+        endTime: null,
+        description: "",
+        problemAmount: null,
+        participantAmount: null,
+        passwordSet: false,
+      },
       current: null,
       timer: null,
       status: "before",
-      description: "",
-      problemAmount: null,
-      participantAmount: null,
-      passwordSet: false,
+    }
+  },
+  provide: function () {
+    return {
+      contest: this.contest
     }
   },
   computed: {
@@ -106,20 +115,23 @@ export default {
     },
     statusTipText: function () {
       if (this.status === "before") {
-        return "距离比赛开始还有：" + this.formatTimeInterval(this.startTime - this.current)
+        return "距离比赛开始还有：" + this.formatTimeInterval(this.contest.startTime - this.current)
       } else if (this.status === "after") {
         return "比赛已结束"
       } else {
-        return "距离比赛结束还有：" + this.formatTimeInterval(this.endTime - this.current)
+        return "距离比赛结束还有：" + this.formatTimeInterval(this.contest.endTime - this.current)
       }
     },
+    basePath: function () {
+      return "/contest/" + this.id;
+    }
   },
   methods: {
     updateStatus: function () {
       this.current = new Date()
-      if (this.current < this.startTime) {
+      if (this.current < this.contest.startTime) {
         this.status = "before"
-      } else if (this.current >= this.endTime) {
+      } else if (this.current >= this.contest.endTime) {
         this.status = "after"
       } else {
         this.status = "ongoing"
@@ -159,21 +171,23 @@ export default {
     this.loading = true
     axios.get("/contests/" + this.id)
         .then((response) => {
-          this.authorId = response.data.authorId
-          this.authorUsername = response.data.authorUsername
-          this.name = response.data.name
-          this.type = response.data.type
-          this.startTime = new Date(response.data.startTime)
-          this.endTime = new Date(response.data.endTime)
+          this.contest.id = response.data.id
+          this.contest.authorId = response.data.authorId
+          this.contest.authorUsername = response.data.authorUsername
+          this.contest.name = response.data.name
+          this.contest.type = response.data.type
+          this.contest.startTime = new Date(response.data.startTime)
+          this.contest.endTime = new Date(response.data.endTime)
           this.updateStatus()
           this.timer = setInterval(this.updateStatus, 500)
-          this.description = response.data.description
-          this.problemAmount = response.data.problemAmount
-          this.participantAmount = response.data.participantAmount
-          this.passwordSet = response.data.passwordSet
+          this.contest.description = response.data.description
+          this.contest.problemAmount = response.data.problemAmount
+          this.contest.participantAmount = response.data.participantAmount
+          this.contest.passwordSet = response.data.passwordSet
           this.loading = false
         }).catch((error) => {
       this.$message.error(error.response.data)
+      this.isAuthor = this.contest.authorId === this.$root.loginStatus.userid
       this.loading = false
     })
   },

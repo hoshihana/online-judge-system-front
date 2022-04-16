@@ -56,6 +56,7 @@ import {
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import moment from 'moment'
+import ScrollNumber from "vue-scroll-number";
 
 /* add icons to the library */
 library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
@@ -76,6 +77,8 @@ Vue.prototype.$moment = moment
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+
+Vue.use(ScrollNumber, {transitionTime: 400})
 
 new Vue({
     data: {
