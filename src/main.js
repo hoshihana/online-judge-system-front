@@ -51,7 +51,7 @@ import {
     faScaleBalanced,
     faPen,
     faStopwatch,
-    faClockRotateLeft, faCalendarDays
+    faClockRotateLeft, faCalendarDays, faFlag, faCheck
 } from '@fortawesome/free-solid-svg-icons'
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
@@ -67,7 +67,7 @@ library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
     faAnglesRight, faFileZipper, faBox, faHashtag, faCloudArrowDown, faArrowsRotate,
     faGears, faGrip, faCaretRight, faAnglesLeft, faLock, faList, faHourglassStart,
     faHourglassEnd, faUsers, faScaleBalanced, faStopwatch, faPen, faClockRotateLeft,
-    faCalendarDays)
+    faCalendarDays, faFlag, faCheck)
 
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)
@@ -78,7 +78,7 @@ Vue.config.productionTip = false
 
 Vue.use(ElementUI)
 
-Vue.use(ScrollNumber, {transitionTime: 400})
+Vue.use(ScrollNumber, {transitionTime: 500})
 
 new Vue({
     data: {

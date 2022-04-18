@@ -20,6 +20,8 @@ import UserContestListView from "@/views/UserContestListView";
 import ContestEditView from "@/views/ContestEditView";
 import ContestView from "@/views/ContestView";
 import ContestDetailView from "@/views/ContestDetailView";
+import ContestProblemList from "@/views/ContestProblemList";
+import ContestProblemView from "@/views/ContestProblemView";
 
 Vue.use(VueRouter)
 
@@ -129,6 +131,18 @@ const routes = [
                 path: '',
                 name: 'contestDetail',
                 component: ContestDetailView,
+                props: true
+            },
+            {
+                path: 'problem/list',
+                name: 'contestProblemList',
+                component: ContestProblemList,
+                props: true
+            },
+            {
+                path: 'problem/:problemId',
+                name: 'contestProblemList',
+                component: ContestProblemView,
                 props: true
             },
         ]

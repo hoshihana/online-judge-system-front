@@ -6,10 +6,13 @@
           <el-row style="padding: 20px;" class="contest-card" type="flex">
             <el-col :span="18">
               <div style="margin-left: 10px">
-                <el-tag effect="dark" :type="getTypeTagType(contest.type)" class="type-tag">{{ getTypeTagText(contest.type) }}</el-tag>
+                <el-tag effect="dark" :type="getTypeTagType(contest.type)" class="type-tag">
+                  {{ getTypeTagText(contest.type) }}
+                </el-tag>
                 <b style="line-height: 55px; font-size: x-large">{{ contest.id + " " + contest.name }}</b>
                 <el-tooltip v-if="contest.passwordSet" content="需要参赛密码" placement="right">
-                  <font-awesome-icon style="margin-left: 15px; margin-bottom: 2px" size="lg" color="rgb(144,147,153)" icon="fa-solid fa-lock"/>
+                  <font-awesome-icon style="margin-left: 15px; margin-bottom: 2px" size="lg" color="rgb(144,147,153)"
+                                     icon="fa-solid fa-lock"/>
                 </el-tooltip>
               </div>
               <div style="margin: 20px 30px; color: #606266">
@@ -38,15 +41,62 @@
           </el-row>
           <el-row style="padding: 0 10px" type="flex" align="middle">
             <el-col :span="18">
-              <el-menu :default-active="$route.fullPath" mode="horizontal" router>
+              <el-menu :default-active="$route.fullPath" mode="horizontal" router active-text-color="#409EFF" text-color="#606266">
                 <el-menu-item :index="basePath">比赛详情</el-menu-item>
-                <el-menu-item :index="basePath + '/problem/list'">题目列表</el-menu-item>
-                <el-menu-item>题目...</el-menu-item>
-                <el-menu-item>提交记录</el-menu-item>
-                <el-menu-item>排行榜</el-menu-item>
+                <el-menu-item :index="basePath + '/problem/list'" :disabled="!user.isAuthor && !user.isParticipant">
+                  题目列表
+                </el-menu-item>
+                <el-submenu :disabled="!user.isAuthor && !user.isParticipant"
+                            :index="basePath + '/problem'"
+                            @click.native="$router.push(basePath + '/problem/' + currentMenuProblemNumber)">
+                  <template #title>
+                    <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{ currentMenuProblemNumber}}
+                  </template>
+                  <el-menu-item v-for="i in contest.problemAmount" :index="basePath + '/problem/' + i" :key="i" style="width: 50px">
+                    <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{i}}
+                  </el-menu-item>
+                </el-submenu>
+                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant">提交记录</el-menu-item>
+                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant">排行榜</el-menu-item>
               </el-menu>
             </el-col>
-            <el-col :span="6" style="text-align: right">
+            <el-col :span="6" style="display: flex; justify-content: flex-end;">
+              <el-button v-if="user.isAuthor" type="primary" size="medium" plain style="margin-right: 20px"
+                         @click="editContest">
+                <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
+                编辑比赛
+              </el-button>
+              <el-button v-if="!user.isAuthor && status!=='before'" type="warning" size="medium" plain
+                         style="margin-right: 20px" @click="showParticipateDialog = true"
+                         :disabled="user.isParticipant">
+                <font-awesome-icon icon="fa-solid fa-flag" fixed-width></font-awesome-icon>
+                {{ user.isParticipant ? "已参赛" : "参加比赛" }}
+              </el-button>
+              <el-dialog :visible.sync="showParticipateDialog" width="40%" :destroy-on-close="true"
+                         @open="nickname = password = null">
+                <template #title>
+                  <font-awesome-icon icon="fa-solid fa-flag" fixed-width></font-awesome-icon>
+                  参加比赛
+                </template>
+                <div style="font-size: medium; margin-bottom: 10px">
+                  <b>参赛昵称</b>
+                </div>
+                <div style="margin: 0 15px">
+                  <el-input type="text" placeholder="参赛昵称" v-model="nickname" maxlength="30" show-word-limit></el-input>
+                </div>
+                <div v-if="contest.passwordSet" style="font-size: medium; margin: 20px 0 10px">
+                  <b>参赛密码<span style="color: #F56C6C">*</span></b>
+                </div>
+                <div v-if="contest.passwordSet" style="margin: 0 15px">
+                  <el-input type="password" placeholder="参赛密码" v-model="password" show-password></el-input>
+                </div>
+                <template #footer>
+                  <div>
+                    <el-button size="medium" plain @click="showParticipateDialog = false">取消</el-button>
+                    <el-button type="primary" size="medium" plain @click="participate">确定</el-button>
+                  </div>
+                </template>
+              </el-dialog>
               <el-tooltip :content="statusTipText" placement="bottom">
                 <el-tag class="status-tag" :type="statusTagType">{{ statusTagText }}</el-tag>
               </el-tooltip>
@@ -70,7 +120,6 @@ export default {
   data: function () {
     return {
       loading: false,
-      isAuthor: false,
       contest: {
         id: null,
         authorId: null,
@@ -84,14 +133,23 @@ export default {
         participantAmount: null,
         passwordSet: false,
       },
+      currentMenuProblemNumber: 1,
+      showParticipateDialog: false,
+      nickname: null,
+      password: null,
       current: null,
       timer: null,
       status: "before",
+      user: {
+        isAuthor: null,
+        isParticipant: null,
+      }
     }
   },
   provide: function () {
     return {
-      contest: this.contest
+      contest: this.contest,
+      user: this.user
     }
   },
   computed: {
@@ -124,7 +182,17 @@ export default {
     },
     basePath: function () {
       return "/contest/" + this.id;
+    },
+  },
+  beforeRouteUpdate: function (to, from, next) {
+    let fullPath = to.fullPath
+    if(new RegExp("^" + this.basePath + "/problem/[1-9][0-9]*$").test(fullPath)) {
+      let problemNumber = parseInt(fullPath.slice(fullPath.lastIndexOf("/") + 1, fullPath.length))
+      if(problemNumber <= this.contest.problemAmount) {
+        this.currentMenuProblemNumber = problemNumber
+      }
     }
+    next()
   },
   methods: {
     updateStatus: function () {
@@ -166,6 +234,24 @@ export default {
       result += Math.floor(interval / 1000).toString() + "秒"
       return result
     },
+    editContest: function () {
+      this.$router.push("/contest/" + this.id + "/edit")
+    },
+    participate: function () {
+      if (this.contest.passwordSet && (this.password === null || this.password === "")) {
+        this.$message.error("请输入参赛密码");
+      }
+      axios.post("/contests/" + this.id + "/participate", {
+        "nickname": this.nickname,
+        "password": this.password
+      }).then(() => {
+        this.$message.success("参加比赛成功")
+        this.user.isParticipant = true
+        this.showParticipateDialog = false
+      }).catch((error) => {
+        this.$message.error(error.response.data)
+      })
+    }
   },
   mounted: function () {
     this.loading = true
@@ -179,15 +265,31 @@ export default {
           this.contest.startTime = new Date(response.data.startTime)
           this.contest.endTime = new Date(response.data.endTime)
           this.updateStatus()
-          this.timer = setInterval(this.updateStatus, 500)
+          this.timer = setInterval(this.updateStatus, 100)
           this.contest.description = response.data.description
           this.contest.problemAmount = response.data.problemAmount
           this.contest.participantAmount = response.data.participantAmount
           this.contest.passwordSet = response.data.passwordSet
+          this.user.isAuthor = this.contest.authorId === this.$root.loginStatus.userid
           this.loading = false
+          // 初始化currentMenuProblemNumber
+          let fullPath = this.$route.fullPath
+          if(new RegExp("^" + this.basePath + "/problem/[1-9][0-9]*$").test(fullPath)) {
+            let problemNumber = parseInt(fullPath.slice(fullPath.lastIndexOf("/") + 1, fullPath.length))
+            if(problemNumber <= this.contest.problemAmount) {
+              this.currentMenuProblemNumber = problemNumber
+            }
+          }
+          if (!this.user.isAuthor) {
+            axios.post("/contests/" + this.id + "/users/" + this.$root.loginStatus.userid + "/isParticipant")
+                .then((response) => {
+                  this.user.isParticipant = response.data
+                }).catch((error) => {
+              this.$message.error(error.response.data)
+            })
+          }
         }).catch((error) => {
       this.$message.error(error.response.data)
-      this.isAuthor = this.contest.authorId === this.$root.loginStatus.userid
       this.loading = false
     })
   },
@@ -228,5 +330,10 @@ export default {
   width: 0;
   height: 40px;
   border-left: 2px dashed #a8a8a8;
+}
+
+::v-deep .el-menu-item:hover{
+  outline: 0 !important;
+  color: #409EFF !important;
 }
 </style>
