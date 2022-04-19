@@ -282,7 +282,6 @@ export default {
             axios.get("/records/recent", {
               params: {
                 "problemId": this.problemDetail.id,
-                "userId": this.$root.loginStatus.userid,
                 "limit": this.limit
               }
             }).then((response) => {
@@ -413,7 +412,7 @@ export default {
         }).then((response) => {
           this.records = response.data
         })
-        axios.get("/problems/" + this.id + "/amount"
+        axios.get("/problems/" + this.id + "/status"
         ).then((response) => {
           this.triedUserAmount = response.data.triedUserAmount || 0
           this.passedUserAMount = response.data.passedUserAmount || 0

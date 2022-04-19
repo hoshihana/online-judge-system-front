@@ -140,7 +140,7 @@ const routes = [
                 props: true
             },
             {
-                path: 'problem/:problemId',
+                path: 'problem/:problemNumber',
                 name: 'contestProblemList',
                 component: ContestProblemView,
                 props: true
@@ -170,7 +170,7 @@ const router = new VueRouter({
     base: process.env.BASE_URL,
     routes
 })
-
+// todo 做各页面的路由前鉴权
 router.beforeEach((to, from, next) => {
     axios.get("/accounts/loginStatus")
         .then((response) => {

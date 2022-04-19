@@ -372,7 +372,7 @@ export default {
       }).then(() => {
         this.$message.success("比赛创建成功")
         this.saved = true
-        this.$router.push("/user/" + this.$root.loginStatus.userid + "/contest/list") // todo 跳转至创建的比赛页面
+        this.$router.push("/user/" + this.$root.loginStatus.userid + "/contest/list")
       }).catch((error) => {
         this.$message.error(error.response.data)
       })
