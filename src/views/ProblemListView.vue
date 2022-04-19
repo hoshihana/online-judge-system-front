@@ -92,7 +92,6 @@ export default {
       })
     },
     search: function () {
-      this.pageIndex = 1
       this.update()
     },
     getPercent: function (up, down) {

@@ -22,7 +22,7 @@
               </div>
               <div style="margin: 20px 30px 10px; color: #606266">
                 <font-awesome-icon icon="fa-solid fa-stopwatch" fixed-width></font-awesome-icon>
-                比赛时长：{{ formatTimeInterval(contest.endTime - contest.startTime) }}
+                比赛时长：{{ formatTimeInterval(contest.endTime - contest.startTime, false) }}
               </div>
             </el-col>
             <el-col :span="6" style="position: relative">
@@ -173,11 +173,11 @@ export default {
     },
     statusTipText: function () {
       if (this.status === "before") {
-        return "距离比赛开始还有：" + this.formatTimeInterval(this.contest.startTime - this.current)
+        return "距离比赛开始还有：" + this.formatTimeInterval(this.contest.startTime - this.current, true)
       } else if (this.status === "after") {
         return "比赛已结束"
       } else {
-        return "距离比赛结束还有：" + this.formatTimeInterval(this.contest.endTime - this.current)
+        return "距离比赛结束还有：" + this.formatTimeInterval(this.contest.endTime - this.current, true)
       }
     },
     basePath: function () {
@@ -221,17 +221,27 @@ export default {
           return "竞赛"
       }
     },
-    formatTimeInterval: function (interval) {
+    formatTimeInterval: function (interval, full) {
       let result = ""
-      if (interval > 24 * 60 * 60 * 1000) {
-        result += Math.floor(interval / (24 * 60 * 60 * 1000)).toString() + "天 "
-        interval %= 24 * 60 * 60 * 1000
-      }
-      result += Math.floor(interval / (60 * 60 * 1000)).toString() + "时 "
+      let day = Math.floor(interval / (24 * 60 * 60 * 1000)).toString()
+      interval %= 24 * 60 * 60 * 1000
+      let hour = Math.floor(interval / (60 * 60 * 1000)).toString()
       interval %= 60 * 60 * 1000
-      result += Math.floor(interval / (60 * 1000)).toString() + "分 "
+      let minute = Math.floor(interval / (60 * 1000)).toString()
       interval %= 60 * 1000
-      result += Math.floor(interval / 1000).toString() + "秒"
+      let second = Math.floor(interval / 1000).toString()
+      if (day > 0) {
+        result += day + "天 "
+      }
+      if (hour > 0 || full) {
+        result += hour + "时 "
+      }
+      if (minute > 0 || full) {
+        result += minute +"分 "
+      }
+      if (second > 0 || full) {
+        result += second +"秒"
+      }
       return result
     },
     editContest: function () {
