@@ -22,6 +22,8 @@ import ContestView from "@/views/ContestView";
 import ContestDetailView from "@/views/ContestDetailView";
 import ContestProblemList from "@/views/ContestProblemList";
 import ContestProblemView from "@/views/ContestProblemView";
+import ContestRecordView from "@/views/ContestRecordView";
+import ContestRecordListView from "@/views/ContestRecordListView";
 
 Vue.use(VueRouter)
 
@@ -141,11 +143,32 @@ const routes = [
             },
             {
                 path: 'problem/:problemNumber',
-                name: 'contestProblemList',
+                name: 'contestProblem',
                 component: ContestProblemView,
                 props: true
             },
+            {
+                path: 'record/list',
+                name: 'contestRecordList',
+                component: ContestRecordListView,
+                props: true
+            }
         ]
+    },
+    {
+        path: '/contest/:contestId/record/:recordId',
+        name: 'contestRecord',
+        component: ContestRecordView,
+        props: true,
+        beforeEnter: function (to, from, next) {
+            axios.get("/contests/" + to.params.contestId + "/records/" + to.params.recordId + "/check")
+                .then(() => {
+                    next()
+                }).catch((error) => {
+                router.app.$message.error(error.response.data)
+                next(false)
+            })
+        }
     },
     {
         path: '/record/list',

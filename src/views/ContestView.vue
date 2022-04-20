@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-container>
-      <el-header v-loading="loading" height="auto">
+      <el-header v-loading="loading" height="auto" style="padding-left: 0; padding-right: 0">
         <el-card body-style="padding: 0">
           <el-row style="padding: 20px;" class="contest-card" type="flex">
             <el-col :span="18">
@@ -48,7 +48,7 @@
                 </el-menu-item>
                 <el-submenu :disabled="!user.isAuthor && !user.isParticipant"
                             :index="basePath + '/problem'"
-                            @click.native="$router.push(basePath + '/problem/' + currentMenuProblemNumber)">
+                            @click.native="goProblem">
                   <template #title>
                     <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{ currentMenuProblemNumber}}
                   </template>
@@ -56,7 +56,7 @@
                     <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{i}}
                   </el-menu-item>
                 </el-submenu>
-                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant">提交记录</el-menu-item>
+                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant" :index="basePath + '/record/list'">提交记录</el-menu-item>
                 <el-menu-item :disabled="!user.isAuthor && !user.isParticipant">排行榜</el-menu-item>
               </el-menu>
             </el-col>
@@ -104,8 +104,8 @@
           </el-row>
         </el-card>
       </el-header>
-      <el-main>
-        <router-view></router-view>
+      <el-main style="padding-left: 0; padding-right: 0">
+        <router-view :key="this.$route.path"></router-view>
       </el-main>
     </el-container>
   </div>
@@ -261,6 +261,11 @@ export default {
       }).catch((error) => {
         this.$message.error(error.response.data)
       })
+    },
+    goProblem: function () {
+      if(this.user.isAuthor || this.user.isParticipant) {
+        this.$router.push(this.basePath + '/problem/' + this.currentMenuProblemNumber)
+      }
     }
   },
   mounted: function () {

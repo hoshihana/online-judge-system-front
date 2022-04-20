@@ -7,11 +7,12 @@
             <h3 style="margin:0; padding-left: 10px">我的历史提交</h3>
           </el-col>
           <el-col :span="8" style="text-align: center">
-            <h3 style="margin:0">{{problemId + " " + problemName}}</h3>
+            <h3 style="margin:0">{{ isContestProblem ? contestId + "-" + problemNumber + " " + problemName : problemId + " " + problemName }}</h3>
           </el-col>
           <el-col :span="8" style="text-align: right">
             <el-button type="text" @click="update" style="margin-right: 50px" :disabled="loading">
-              <font-awesome-icon icon="fa-solid fa-arrows-rotate" fixed-width></font-awesome-icon> 刷新
+              <font-awesome-icon icon="fa-solid fa-arrows-rotate" fixed-width></font-awesome-icon>
+              刷新
             </el-button>
           </el-col>
         </el-row>
@@ -19,7 +20,9 @@
       <el-table v-loading="loading" ref="list" :data="records" stripe style="width: 100%" :max-height="tableHeight">
         <el-table-column label="#" align="center">
           <template #default="scope">
-            <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id" target="_blank">{{ scope.row.id }}</router-link>
+            <router-link class="el-link el-link--primary" :to="isContestProblem ? '/contest/' + contestId + '/record/' + scope.row.id : '/record/' + scope.row.id" target="_blank">
+              {{ scope.row.id }}
+            </router-link>
           </template>
         </el-table-column>
         <el-table-column label="时间" prop="submitTime" align="center">
@@ -34,7 +37,8 @@
         </el-table-column>
         <el-table-column label="评测结果" align="center">
           <template #default="scope">
-            <el-tag size="small" style="cursor: pointer" :type="getResultType(scope.row.judgeResult)" @click="goRecord(scope.row.id)">{{
+            <el-tag size="small" style="cursor: pointer" :type="getResultType(scope.row.judgeResult)"
+                    @click="goRecord(scope.row.id)">{{
                 getResult(scope.row.judgeResult)
               }} <i v-if="scope.row.judgeResult === 'PD' || scope.row.judgeResult === 'JD'" class="el-icon-loading"></i>
             </el-tag>
@@ -47,7 +51,7 @@
         </el-table-column>
         <el-table-column label="运行内存" prop="executeMemory" align="center">
           <template #default="scope">
-            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory + " KB"}}
+            {{ scope.row.executeMemory === null ? "--" : scope.row.executeMemory + " KB" }}
           </template>
         </el-table-column>
       </el-table>
@@ -60,7 +64,7 @@ import axios from "@/utils/axios";
 
 export default {
   name: "PersonalRecordListDialog",
-  props: ["problemId", "problemName", "dialogKey"],
+  props: ["isContestProblem", "contestId", "problemNumber", "problemId", "problemName", "dialogKey"],
   data: function () {
     return {
       loading: false,
@@ -79,7 +83,7 @@ export default {
   methods: {
     goRecord: function (recordId) {
       let routeUrl = this.$router.resolve({
-        path: "/record/" + recordId,
+        path: this.isContestProblem ? "/contest/" + this.contestId + "/record/" + recordId : "/record/" + recordId,
       });
       window.open(routeUrl.href, '_blank');
     },
@@ -150,19 +154,33 @@ export default {
     },
     update: function () {
       this.loading = true
-      axios.get("/records/recent", {
-        params: {
-          "problemId": this.problemId,
-          "userId": this.$root.loginStatus.userid,
-          "limit": ~(1 << 31)
-        }
-      }).then((response) => {
-        this.records = response.data
-        this.loading = false
-      }).catch((error) => {
-        this.loading = false
-        this.$message.error(error.response.data)
-      })
+      if (this.isContestProblem) {
+        axios.get("/contests/" + this.contestId + "/problems/" + this.problemNumber + "/records/recent", {
+          params: {
+            "limit": ~(1 << 31)
+          }
+        }).then((response) => {
+          this.records = response.data
+          this.loading = false
+        }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      } else {
+        axios.get("/records/recent", {
+          params: {
+            "problemId": this.problemId,
+            "userId": this.$root.loginStatus.userid,
+            "limit": ~(1 << 31)
+          }
+        }).then((response) => {
+          this.records = response.data
+          this.loading = false
+        }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      }
     }
   },
 }

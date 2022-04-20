@@ -139,7 +139,7 @@
           <el-table v-loading="historySubmitLoading" :data="records" stripe style="width: 100%" size="medium">
             <el-table-column label="#" align="center" min-width="1">
               <template #default="scope">
-                <router-link class="el-link el-link--primary" :to="'/record/' + scope.row.id" target="_blank">{{
+                <router-link class="el-link el-link--primary" :to="'/contest/' + id + '/record/' + scope.row.id" target="_blank">{{
                     scope.row.id
                   }}
                 </router-link>
@@ -167,7 +167,7 @@
             <el-button type="text" @click="dialogKey = new Date()">
               查看更多
             </el-button>
-            <personal-record-list-dialog :problem-id="id" :dialog-key="dialogKey" :problem-name="problemDetail.name"></personal-record-list-dialog>
+            <personal-record-list-dialog :contest-id="id" :problem-number="problemNumber" :dialog-key="dialogKey" :problem-name="problemDetail.name" :is-contest-problem="true"></personal-record-list-dialog>
           </div>
         </el-card>
       </el-aside>
@@ -179,6 +179,7 @@
 import axios from "@/utils/axios";
 import problemDetail from "@/components/ProblemDetail";
 import codeEditor from "@/components/CodeEditor";
+import personalRecordListDialog from "@/components/PersonalRecordListDialog";
 
 export default {
   name: "ContestProblemView",
@@ -186,7 +187,8 @@ export default {
   inject: ["contest", "user"],
   components: {
     problemDetail,
-    codeEditor
+    codeEditor,
+    personalRecordListDialog
   },
   data: function () {
     return {
@@ -410,7 +412,7 @@ export default {
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer);
     })
-  }
+  },
 }
 </script>
 

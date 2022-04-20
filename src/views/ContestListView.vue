@@ -2,7 +2,7 @@
   <div>
     <el-card body-style="padding-top: 2px">
       <template #header>
-        <el-input placeholder="题号/题目名" v-model="key" clearable style="width: 250px" maxlength="40"></el-input>
+        <el-input placeholder="比赛/比赛名" v-model="key" clearable style="width: 250px" maxlength="40"></el-input>
         <el-button type="primary" plain size="medium" @click="update" style="margin-left: 15px"
                    :disabled="loading">
           <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
@@ -16,7 +16,7 @@
                     style="display: inline-block; vertical-align: middle;">
               {{ getTypeTagText(scope.row.type) }}
             </el-tag>
-            <div style="display: inline-block; vertical-align: middle;">
+            <div style="display: inline-block; vertical-align: middle">
               <router-link class="el-link el-link--primary" style="font-size: large; margin-bottom: 10px"
                            :to="'/contest/' + scope.row.id">{{ scope.row.name }}
               </router-link>
@@ -44,8 +44,20 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column min-width="1" align="right">
-          status
+        <el-table-column min-width="1" align="right" :key="statusColumnKey">
+          <template #default="scope">
+              <div style="display: inline-block; vertical-align: middle; margin: 7px 0">
+                <el-tooltip placement="left" effect="light" :content="scope.row.statusTipText">
+                  <el-tag :type="scope.row.statusTagType" size="small" style="margin-right: 10px">
+                    {{ scope.row.statusTagText }}
+                  </el-tag>
+                </el-tooltip>
+                <span class="contest-info">{{scope.row.statusInfo}}</span>
+                <el-tooltip placement="right" :content="scope.row.percentage + '%'">
+                  <el-progress :percentage="scope.row.percentage" :status="scope.row.percentageSatus" :format="()=>''" style="margin-top: 12px; text-align: left"></el-progress>
+                </el-tooltip>
+              </div>
+          </template>
         </el-table-column>
       </el-table>
       <el-pagination
@@ -72,7 +84,9 @@ export default {
       total: 0,
       pageIndex: 1,
       pageSize: 10,
-      contests: []
+      contests: [],
+      statusColumnKey: "",
+      timer: null
     }
   },
   methods: {
@@ -93,6 +107,9 @@ export default {
           }
         }).then((response) => {
           this.contests = response.data
+          this.updateStatus()
+          clearInterval(this.timer)
+          this.timer = setInterval(this.updateStatus, 500)
           this.loading = false
         }).catch((error) => {
           this.loading = false
@@ -118,6 +135,36 @@ export default {
         case "COMP":
           return "竞赛"
       }
+    },
+    updateStatus: function () {
+      let current = new Date()
+      for(let i = 0; i < this.contests.length; i++) {
+        let startTime = new Date(this.contests[i].startTime)
+        let endTime = new Date(this.contests[i].endTime)
+        if (current < startTime) {
+          this.contests[i].statusInfo = "开始于 " + this.$moment(startTime).format("yyyy-MM-DD HH:mm")
+          this.contests[i].percentage = 0
+          this.contests[i].percentageSatus = ""
+          this.contests[i].statusTagType = ""
+          this.contests[i].statusTagText = "未开始"
+          this.contests[i].statusTipText = "距离比赛开始还有：" + this.formatTimeInterval(startTime - current)
+        } else if (current >= endTime) {
+          this.contests[i].statusInfo = "结束于 " + this.$moment(endTime).format("yyyy-MM-DD HH:mm")
+          this.contests[i].percentage = 100
+          this.contests[i].percentageSatus = "success"
+          this.contests[i].statusTagType = "info"
+          this.contests[i].statusTagText = "已结束"
+          this.contests[i].statusTipText = "比赛已结束"
+        } else {
+          this.contests[i].statusInfo = "结束于 " + this.$moment(endTime).format("yyyy-MM-DD HH:mm")
+          this.contests[i].percentage = Math.floor((current - startTime) / (endTime - startTime) * 100)
+          this.contests[i].percentageSatus = ""
+          this.contests[i].statusTagType = "success"
+          this.contests[i].statusTagText = "进行中"
+          this.contests[i].statusTipText  = "距离比赛结束还有：" + this.formatTimeInterval(endTime - current)
+        }
+      }
+      this.statusColumnKey = Math.random().toString()
     },
     formatTimeInterval: function (interval, full) {
       let result = ""
@@ -145,6 +192,9 @@ export default {
   },
   mounted() {
     this.update();
+  },
+  destroyed: function () {
+    clearInterval(this.timer)
   }
 }
 </script>
@@ -165,5 +215,10 @@ export default {
   margin-right: 10px;
   font-size: small;
   color: #909399;
+}
+
+::v-deep .el-progress-bar {
+  padding-right: 20px;
+  margin-right: -25px;
 }
 </style>

@@ -171,7 +171,7 @@
             <el-button type="text" @click="dialogKey = new Date()">
               查看更多
             </el-button>
-            <personal-record-list-dialog :problem-id="id" :dialog-key="dialogKey" :problem-name="problemDetail.name"></personal-record-list-dialog>
+            <personal-record-list-dialog :problem-id="id" :dialog-key="dialogKey" :problem-name="problemDetail.name" :is-contest-problem="false"></personal-record-list-dialog>
           </div>
         </el-card>
       </el-aside>

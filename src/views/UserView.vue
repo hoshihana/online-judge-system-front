@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-container>
-      <el-header height="auto">
+      <el-header height="auto" style="padding-left: 0; padding-right: 0">
         <el-card body-style="padding: 0">
           <el-row style="padding: 20px" class="user-card">
             <el-col :span="12" style="text-align: left">
@@ -21,7 +21,7 @@
           </el-row>
         </el-card>
       </el-header>
-      <el-main>
+      <el-main style="padding-left: 0; padding-right: 0">
         <router-view></router-view>
       </el-main>
     </el-container>

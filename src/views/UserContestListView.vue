@@ -9,7 +9,7 @@
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column label="#" min-width="6">
+        <el-table-column label="#" min-width="6" align="center">
           <template #default="scope">
             <router-link class="el-link el-link--primary" :to="'/contest/' + scope.row.id">{{
                 scope.row.id
@@ -84,7 +84,7 @@
             </el-button>
           </template>
           <template #default="scope">
-            <router-link class="el-link el-link--primary" :to="'/contest/' + scope.row.id">
+            <router-link class="el-link el-link--primary" :to="'/contest/' + scope.row.id + '/problem/list'">
               <font-awesome-icon icon="fa-solid fa-list"></font-awesome-icon>&nbsp;&nbsp;{{ scope.row.problemAmount }} 题
             </router-link>
           </template>
