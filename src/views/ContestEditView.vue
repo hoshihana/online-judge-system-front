@@ -367,6 +367,8 @@ import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
 import draggable from 'vuedraggable'
 
+// todo 添加删除比赛功能
+
 export default {
   name: "ContestEditView",
   props: ["id"],

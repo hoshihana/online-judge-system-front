@@ -14,7 +14,8 @@
                     style="font-size: x-large">{{ problemDetail.id + ' ' + problemDetail.name }}</b></span>
               </el-col>
               <el-col :span="12" style="text-align: right; float: right">
-                <el-tooltip content="测试点尚未配置" placement="left" effect="light"
+                <el-tag :type="getTagType(problemDetail.visibility)" style="margin-right: 10px">{{getTagText(problemDetail.visibility)}}</el-tag>
+                <el-tooltip content="测试点尚未配置" placement="bottom" effect="light"
                             :disabled="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
                   <el-badge is-dot
                             :hidden="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
@@ -384,6 +385,26 @@ export default {
           return "warning"
         default:
           return ""
+      }
+    },
+    getTagText: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "私密题目"
+        case "HIDDEN":
+          return "比赛题目"
+        case "PUBLIC":
+          return "公开题目"
+      }
+    },
+    getTagType: function (visibility) {
+      switch (visibility) {
+        case "PRIVATE":
+          return "danger"
+        case "HIDDEN":
+          return "warning"
+        case "PUBLIC":
+          return "success"
       }
     },
     goRecord: function (recordId) {

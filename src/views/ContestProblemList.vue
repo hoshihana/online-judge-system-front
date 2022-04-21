@@ -35,7 +35,7 @@
         </el-table-column>
         <el-table-column label="总通过" min-width="2" align="center">
           <template #default="scope">
-            {{ scope.row.submit }}
+            {{ scope.row.accept }}
           </template>
         </el-table-column>
         <el-table-column label="通过率" min-width="2" align="center">

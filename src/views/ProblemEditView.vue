@@ -70,7 +70,7 @@
           <div style="margin: 15px">
             <el-radio-group v-model="visibility">
               <el-radio label="PRIVATE">私密题目</el-radio>
-              <el-radio label="HIDDEN">练习/比赛题目</el-radio>
+              <el-radio label="HIDDEN">比赛题目</el-radio>
               <el-radio label="PUBLIC">公开题目</el-radio>
             </el-radio-group>
           </div>
