@@ -199,7 +199,7 @@ import axios from "@/utils/axios";
 import draggable from 'vuedraggable'
 
 export default {
-  name: "ContestCreateView",
+  name: "ContestNewView",
   components: {
     mavonEditor,
     draggable

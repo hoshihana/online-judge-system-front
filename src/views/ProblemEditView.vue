@@ -2,16 +2,7 @@
   <div>
     <el-card v-loading="loading">
       <template #header>
-        <el-row v-if="!existent">
-          <el-col :span="8" style="text-align: left">
-            <el-button type="primary" size="medium" plain @click="backToUserProblemList">
-              <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
-              返回我的题库
-            </el-button>
-          </el-col>
-          <el-col :span="16" style="text-align: right"><b style="font-size: x-large">题目创建</b></el-col>
-        </el-row>
-        <el-row v-else>
+        <el-row>
           <el-col :span="8" style="text-align: left">
             <el-button type="primary" size="medium" plain @click="backToProblem">
               <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
@@ -28,8 +19,6 @@
       </template>
       <el-tabs tab-position="left" stretch>
         <el-tab-pane label="题目编辑">
-          <el-alert v-if="!existent" style="margin: 10px;width: 350px" title="请保存当前内容后再进行测试点的配置" type="warning"
-                    show-icon close-text="知道了"></el-alert>
           <h3>题目名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
                     style="width: 80%; margin: 15px"></el-input>
@@ -88,13 +77,13 @@
             </ul>
           </el-alert>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="editProblem">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
               保存
             </el-button>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="测试点配置" :disabled="!existent">
+        <el-tab-pane label="测试点配置">
           <h3>时间限制<b style="color: #F56C6C">*</b>
             &nbsp;<el-tooltip effect="dark" content="每个测试点的最大运行时间限制，范围限制：500ms~15000ms" placement="right">
               <font-awesome-icon icon="fa-solid fa-circle-question" size="xs" color="#7F7F7F"></font-awesome-icon>
@@ -147,7 +136,8 @@
             </el-alert>
             <el-row>
               <el-col :span="7">
-                <el-upload :action="uploadUrl" drag :multiple="false" :with-credentials="true" :show-file-list="false" accept=".zip"
+                <el-upload :action="uploadUrl" drag :multiple="false" :with-credentials="true" :show-file-list="false"
+                           accept=".zip"
                            :before-upload="beforeUpload"
                            :on-success="onUploadSuccess"
                            :on-error="onUploadError">
@@ -210,7 +200,7 @@
             </el-row>
           </div>
           <div style="text-align: right">
-            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="save">
+            <el-button type="primary" size="medium" style="margin: 10px 20px" plain @click="editProblem">
               <font-awesome-icon icon="fa-solid fa-floppy-disk"></font-awesome-icon>
               保存
             </el-button>
@@ -226,9 +216,6 @@ import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import axios from "@/utils/axios";
 import JSZip from "jszip"
-import router from "@/router";
-
-// todo 将题目创建和题目编辑页面分离
 
 export default {
   name: "ProblemEditView",
@@ -300,30 +287,11 @@ export default {
       },
     }
   },
-  beforeRouteEnter: function (to, from, next) {
-    if (to.fullPath === "/problem/new") {
-      next()
-    } else {
-      axios.get("/problems/" + to.params.id + "/authorId")
-          .then((response) => {
-            if (response.data !== router.app.$root.loginStatus.userid) {
-              router.app.$message.error("无权编辑该题目")
-              next(false)
-            } else {
-              next()
-            }
-          })
-          .catch((error) => {
-            router.app.$message.error(error.response.data)
-            next(false)
-          })
-    }
-  },
   beforeRouteLeave: function (to, from, next) {
     if (this.saved) {
       next()
     } else {
-      this.$confirm(this.existent ? '可能有未保存的修改, 是否继续离开?' : '创建的题目尚未保存，是否继续离开？', '确认信息', {
+      this.$confirm('可能有未保存的修改, 是否继续离开?', '确认信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -335,45 +303,41 @@ export default {
     }
   },
   mounted: function () {
-    if (this.$route.fullPath === "/problem/new") {
-      this.existent = false
-    } else {
-      // todo 部署时修改该url
-      this.uploadUrl = "http://localhost:8088/problems/" + this.id + "/test"
-      this.existent = true
-      this.loading = true
-      axios.get("/problems/" + this.id)
-          .then((response) => {
-            this.loading = false
-            this.name = response.data.name
-            this.authorId = response.data.authorId
-            this.description = response.data.description
-            this.inputFormat = response.data.inputFormat
-            this.outputFormat = response.data.outputFormat
-            this.samples = eval(response.data.samples)
-            this.explanation = response.data.explanation
-            this.timeLimit = response.data.timeLimit
-            this.memoryLimit = response.data.memoryLimit
-            this.visibility = response.data.visibility
-          })
-          .catch((error) => {
-            this.loading = false
+    // todo 部署时修改该url
+    this.uploadUrl = "http://localhost:8088/problems/" + this.id + "/test"
+    this.existent = true
+    this.loading = true
+    axios.get("/problems/" + this.id)
+        .then((response) => {
+          this.loading = false
+          this.name = response.data.name
+          this.authorId = response.data.authorId
+          this.description = response.data.description
+          this.inputFormat = response.data.inputFormat
+          this.outputFormat = response.data.outputFormat
+          this.samples = eval(response.data.samples)
+          this.explanation = response.data.explanation
+          this.timeLimit = response.data.timeLimit
+          this.memoryLimit = response.data.memoryLimit
+          this.visibility = response.data.visibility
+        })
+        .catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+    this.testInfoLoading = true
+    axios.get("/problems/" + this.id + "/testInfo")
+        .then((response) => {
+          this.testInfo = response.data
+          this.testSet = true
+          this.testInfoLoading = false
+        })
+        .catch((error) => {
+          if (error.response.status !== 404) {
             this.$message.error(error.response.data)
-          })
-      this.testInfoLoading = true
-      axios.get("/problems/" + this.id + "/testInfo")
-          .then((response) => {
-            this.testInfo = response.data
-            this.testSet = true
-            this.testInfoLoading = false
-          })
-          .catch((error) => {
-            if (error.response.status !== 404) {
-              this.$message.error(error.response.data)
-            }
-            this.testInfoLoading = false
-          })
-    }
+          }
+          this.testInfoLoading = false
+        })
   },
   methods: {
     addSample: function () {
@@ -384,42 +348,6 @@ export default {
     },
     removeSample: function (index) {
       this.samples.splice(index, 1)
-    },
-    save: function () {
-      if (!this.existent) {
-        this.newProblem()
-      } else {
-        this.editProblem()
-      }
-    },
-    newProblem: function () {
-      if (this.name === "") {
-        this.$message.error("题目名不能为空")
-      } else {
-        this.loading = true
-        axios.post("/problems/", {
-          "name": this.name,
-          "description": this.description,
-          "inputFormat": this.inputFormat,
-          "outputFormat": this.outputFormat,
-          "explanation": this.explanation,
-          "samples": JSON.stringify(this.samples),
-          "timeLimit": this.timeLimit,
-          "memoryLimit": this.memoryLimit,
-          "visibility": this.visibility
-        }).then((response) => {
-          this.loading = false
-          this.$message({
-            message: "题目创建成功",
-            type: "success"
-          })
-          this.saved = true
-          this.$router.replace("/problem/" + response.data)
-        }).catch((error) => {
-          this.loading = false
-          this.$message.error(error.response.data)
-        })
-      }
     },
     editProblem: function () {
       if (this.name === "") {
@@ -472,9 +400,6 @@ export default {
     },
     backToProblem: function () {
       this.$router.replace("/problem/" + this.id)
-    },
-    backToUserProblemList: function () {
-      this.$router.replace("/user/" + this.$root.loginStatus.userid + "/problem/list")
     },
     getTestSize: function () {
       if (this.testInfo.length === "--") {
@@ -534,7 +459,7 @@ export default {
                 }
               }
             })
-            if(cur === 0 || cur % 2 === 1) {
+            if (cur === 0 || cur % 2 === 1) {
               valid = false
             }
           }, function () {
@@ -558,19 +483,19 @@ export default {
     },
     downloadTestFile: function () {
       axios.get("/problems/" + this.id + "/test", {responseType: "blob"})
-        .then((response) => {
-          const blob = new Blob([response.data], {type: 'application/x-zip-compressed;charset=utf-8'});
-          const href = window.URL.createObjectURL(blob);
-          let filename = this.id + ".zip";
-          const downloadElement = document.createElement('a');
-          downloadElement.style.display = 'none';
-          downloadElement.href = href;
-          downloadElement.download = filename ;
-          document.body.appendChild(downloadElement);
-          downloadElement.click();
-          document.body.removeChild(downloadElement);
-          window.URL.revokeObjectURL(href);
-        })
+          .then((response) => {
+            const blob = new Blob([response.data], {type: 'application/x-zip-compressed;charset=utf-8'});
+            const href = window.URL.createObjectURL(blob);
+            let filename = this.id + ".zip";
+            const downloadElement = document.createElement('a');
+            downloadElement.style.display = 'none';
+            downloadElement.href = href;
+            downloadElement.download = filename;
+            document.body.appendChild(downloadElement);
+            downloadElement.click();
+            document.body.removeChild(downloadElement);
+            window.URL.revokeObjectURL(href);
+          })
     }
   }
 }

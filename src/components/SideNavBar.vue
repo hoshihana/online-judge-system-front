@@ -114,9 +114,9 @@ export default {
 }
 
 .item-div-active {
-  color: #ffffff;
-  background-color: rgb(24, 144, 255);
-}
+      color: #ffffff;
+      background-color: rgb(24, 144, 255);
+    }
 
 
-</style>
+  </style>

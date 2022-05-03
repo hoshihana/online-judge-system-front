@@ -14,7 +14,6 @@ import UserHomeView from "@/views/UserHomeView";
 import UserProfileView from "@/views/UserProfileView";
 import UserProblemListView from "@/views/UserProblemListView";
 import RecordView from "@/views/RecordView";
-import ContestCreateView from "@/views/ContestCreateView";
 import ContestListView from "@/views/ContestListView";
 import UserContestListView from "@/views/UserContestListView";
 import ContestEditView from "@/views/ContestEditView";
@@ -24,6 +23,8 @@ import ContestProblemList from "@/views/ContestProblemList";
 import ContestProblemView from "@/views/ContestProblemView";
 import ContestRecordView from "@/views/ContestRecordView";
 import ContestRecordListView from "@/views/ContestRecordListView";
+import ContestNewView from "@/views/ContestNewView";
+import ProblemNewView from "@/views/ProblemNewView";
 
 Vue.use(VueRouter)
 
@@ -52,7 +53,7 @@ const routes = [
     {
         path: '/problem/new',
         name: 'problemNew',
-        component: ProblemEditView
+        component: ProblemNewView
     },
     {
         path: '/problem/:id',
@@ -110,7 +111,7 @@ const routes = [
     {
         path: '/contest/new',
         name: 'contestNew',
-        component: ContestCreateView,
+        component: ContestNewView,
     },
     {
         path: '/contest/:id/edit',
