@@ -40,17 +40,12 @@ export default {
   methods: {
     login: function () {
       if (this.$root.loginStatus.login) {
-        this.$message.error("已登录，如需更换账号请先登出")
+        this.$message.error("已登录，如需切换账号请先登出")
       } else {
         axios.post("/accounts/login", this.loginInfo)
             .then((response) => {
-              this.$message({
-                message: "登录成功",
-                type: "success"
-              })
-              this.$root.loginStatus.login = true
-              this.$root.loginStatus.userid = response.data
-              this.$root.loginStatus.username = this.loginInfo.username
+              this.$message.success("登录成功")
+              this.$root.loginStatus = response.data
               this.$router.push("/")
             })
             .catch((error) => {

@@ -15,8 +15,8 @@
             <el-menu :default-active="$route.fullPath" mode="horizontal" router active-text-color="#409EFF" text-color="#606266">
               <el-menu-item :index="basePath">主页</el-menu-item>
               <el-menu-item v-if="isSelf" :index="basePath + '/profile'">个人信息</el-menu-item>
-              <el-menu-item v-if="isSelf" :index="basePath + '/problem/list'">我的题目</el-menu-item>
-              <el-menu-item v-if="isSelf" :index="basePath + '/contest/list'">我的比赛</el-menu-item>
+              <el-menu-item v-if="isSelf && isAdmin" :index="basePath + '/problem/list'">我的题目</el-menu-item>
+              <el-menu-item v-if="isSelf && isAdmin" :index="basePath + '/contest/list'">我的比赛</el-menu-item>
             </el-menu>
           </el-row>
         </el-card>
@@ -35,6 +35,9 @@ export default {
   computed: {
     isSelf: function () {
       return parseInt(this.id) === this.$root.loginStatus.userid
+    },
+    isAdmin: function () {
+      return "ADMIN" === this.$root.loginStatus.role
     },
     basePath: function () {
       return "/user/" + this.id;

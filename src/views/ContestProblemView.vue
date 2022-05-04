@@ -111,7 +111,7 @@
             </el-col>
           </el-row>
         </el-card>
-        <el-card style="margin-bottom: 20px" :body-style="{'padding': '0 15px'}">
+        <el-card v-if="user.isParticipant " style="margin-bottom: 20px" :body-style="{'padding': '0 15px'}">
           <template #header>
             <el-row align="middle" type="flex">
               <el-col :span="8" style="text-align: left">
@@ -253,6 +253,9 @@ export default {
             }).catch((error) => {
               this.$message.error(error.response.data)
             })
+            if(!this.user.isParticipant) {
+              return
+            }
             // 异步获取用户在该题的提交和通过次数
             axios.get("/contests/" + this.id + "/problems/" + this.problemNumber + "/users/" + this.$root.loginStatus.userid)
                 .then((response) => {

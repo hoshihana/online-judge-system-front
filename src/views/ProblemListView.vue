@@ -2,11 +2,12 @@
   <div>
     <el-card body-style="padding-top: 2px">
       <template #header>
-        <el-input placeholder="题号/题目名" v-model="key" clearable style="width: 250px" @input="search" maxlength="40">
-          <template #prefix>
-            &nbsp;<font-awesome-icon icon="fa-solid fa-magnifying-glass"></font-awesome-icon>
-          </template>
-        </el-input>
+        <el-input placeholder="题目号/题目名" v-model="key" clearable style="width: 250px" maxlength="40"></el-input>
+        <el-button type="primary" plain size="medium" @click="search" style="margin-left: 15px"
+                   :disabled="loading">
+          <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>
+          搜索
+        </el-button>
       </template>
       <el-table v-loading="loading" :data="problemEntries" stripe style="width: 100%">
         <el-table-column label="#" min-width="1" align="center">
@@ -49,7 +50,6 @@
 import axios from "@/utils/axios";
 
 // todo 页面太宽，也许侧边可以加些其他元素，或添加算法标签
-// todo 将搜索框改成点击搜索触发更新
 
 export default {
   name: "ProblemsView",

@@ -2,7 +2,7 @@
   <div>
     <el-card body-style="padding-top: 2px">
       <template #header>
-        <el-input placeholder="比赛/比赛名" v-model="key" clearable style="width: 250px" maxlength="40"></el-input>
+        <el-input placeholder="比赛号/比赛名" v-model="key" clearable style="width: 250px" maxlength="40"></el-input>
         <el-button type="primary" plain size="medium" @click="update" style="margin-left: 15px"
                    :disabled="loading">
           <font-awesome-icon icon="fa-solid fa-magnifying-glass" fixed-width></font-awesome-icon>

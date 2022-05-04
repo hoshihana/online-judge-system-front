@@ -86,7 +86,7 @@ export default {
     axios.get("/contests/" + this.id + "/problemEntries")
         .then((response) => {
           this.problemEntries = response.data
-          axios.get("/contests/" + this.id + "/problems/users/" + this.$root.loginStatus.userid)
+          axios.get("/contests/" + this.id + "/users/" + this.$root.loginStatus.userid + "/status")
               .then((response) => {
                 if (response.data.length > 0) {
                   for (let i = 0; i < this.problemEntries.length; i++) {

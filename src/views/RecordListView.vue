@@ -100,6 +100,8 @@
 <script>
 import axios from "@/utils/axios";
 
+// todo 仅个人可见记录不可点进去
+
 export default {
   name: "RecordView",
   data: function () {

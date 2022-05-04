@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 import HomeView from '../views/HomeView.vue'
 import AboutView from "@/views/AboutView";
 import ProblemListView from "@/views/ProblemListView";
@@ -32,155 +34,267 @@ const routes = [
     // todo 配置404页面
     {
         path: '/',
-        name: 'home',
         component: HomeView
     },
     {
         path: '/login',
-        name: 'login',
-        component: LoginView
+        component: LoginView,
+        beforeEnter: function (to, from, next) {
+            if (router.app.$root.loginStatus.login) {
+                router.app.$message.error("已登录，如需切换账号请先登出")
+                NProgress.done()
+                next(false)
+            } else {
+                next()
+            }
+        }
     },
     {
         path: '/register',
-        name: 'register',
-        component: RegisterView
+        component: RegisterView,
+        beforeEnter: function (to, from, next) {
+            if (router.app.$root.loginStatus.login) {
+                router.app.$message.error("已登录，如需注册账号请先登出")
+                NProgress.done()
+                next(false)
+            } else {
+                next()
+            }
+        }
     },
     {
         path: '/problem/list',
-        name: 'problemList',
         component: ProblemListView
     },
     {
         path: '/problem/new',
-        name: 'problemNew',
-        component: ProblemNewView
+        component: ProblemNewView,
+        beforeEnter: function (to, from, next) {
+            if (router.app.$root.loginStatus.role !== "ADMIN") {
+                router.app.$message.error("普通用户无权创建题目")
+                NProgress.done()
+                next(false)
+            } else {
+                next()
+            }
+        }
     },
     {
         path: '/problem/:id',
-        name: 'problem',
         component: ProblemView,
         props: true,
         beforeEnter: function (to, from, next) {
-            axios.post("/problems/" + to.params.id + "/check")
+            axios.get("/problems/" + to.params.id + "/permissions/get")
                 .then(() => {
                     next()
                 }).catch((error) => {
                 router.app.$message.error(error.response.data)
+                NProgress.done()
                 next(false)
             })
         }
     },
     {
         path: '/problem/:id/edit',
-        name: 'problemEdit',
         component: ProblemEditView,
         props: true,
+        beforeEnter: function (to, from, next) {
+            axios.get("/problems/" + to.params.id + "/permissions/edit")
+                .then(() => {
+                    next()
+                }).catch((error) => {
+                router.app.$message.error(error.response.data)
+                NProgress.done()
+                next(false)
+            })
+        }
     },
     {
         path: '/user/:id',
-        name: 'user',
         component: UserView,
         props: true,
         children: [
             {
                 path: '',
-                name: 'userHome',
                 component: UserHomeView,
                 props: true
             },
             {
                 path: 'profile',
-                name: 'userProfile',
                 component: UserProfileView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    if (router.app.$root.loginStatus.userid !== parseInt(to.params.id)) {
+                        router.app.$message.error("无权查看他人个人信息")
+                        NProgress.done()
+                        next(false)
+                    } else {
+                        next()
+                    }
+                }
             },
             {
                 path: 'problem/list',
-                name: 'userProblemList',
                 component: UserProblemListView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    if (router.app.$root.loginStatus.role !== "ADMIN") {
+                        router.app.$message.error("普通用户无权创建题目")
+                        NProgress.done()
+                        next(false)
+                    } else if (router.app.$root.loginStatus.userid !== parseInt(to.params.id)) {
+                        router.app.$message.error("无权查看他人创建的题目列表")
+                        NProgress.done()
+                        next(false)
+                    } else {
+                        next()
+                    }
+                }
             },
             {
                 path: 'contest/list',
-                name: 'userContestList',
                 component: UserContestListView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    if (router.app.$root.loginStatus.role !== "ADMIN") {
+                        router.app.$message.error("普通用户无权创建比赛")
+                        NProgress.done()
+                        next(false)
+                    } else if (router.app.$root.loginStatus.userid !== parseInt(to.params.id)) {
+                        router.app.$message.error("无权查看他人创建的比赛列表")
+                        NProgress.done()
+                        next(false)
+                    } else {
+                        next()
+                    }
+                }
             },
         ]
     },
     {
         path: '/contest/new',
-        name: 'contestNew',
         component: ContestNewView,
+        beforeEnter: function (to, from, next) {
+            if (router.app.$root.loginStatus.role !== "ADMIN") {
+                router.app.$message.error("普通用户无权创建比赛")
+                NProgress.done()
+                next(false)
+            } else {
+                next()
+            }
+        }
     },
     {
         path: '/contest/:id/edit',
-        name: 'contest',
         component: ContestEditView,
-        props: true
+        props: true,
+        beforeEnter: function (to, from, next) {
+            axios.get("/contests/" + to.params.id + "/permissions/edit")
+                .then(() => {
+                    next()
+                }).catch((error) => {
+                router.app.$message.error(error.response.data)
+                NProgress.done()
+                next(false)
+            })
+        }
     },
     {
         path: '/contest/list',
-        name: 'contestList',
         component: ContestListView,
     },
     {
         path: '/contest/:id',
-        name: 'contest',
         component: ContestView,
         props: true,
         children: [
             {
                 path: '',
-                name: 'contestDetail',
                 component: ContestDetailView,
-                props: true
+                props: true,
             },
             {
                 path: 'problem/list',
-                name: 'contestProblemList',
                 component: ContestProblemList,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    axios.get("/contests/" + to.params.id + "/permissions/enter")
+                        .then(() => {
+                            next()
+                        }).catch((error) => {
+                        router.app.$message.error(error.response.data)
+                        NProgress.done()
+                        next(false)
+                    })
+                }
             },
             {
                 path: 'problem/:problemNumber',
-                name: 'contestProblem',
                 component: ContestProblemView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    axios.get("/contests/" + to.params.id + "/permissions/enter")
+                        .then(() => {
+                            next()
+                        }).catch((error) => {
+                        router.app.$message.error(error.response.data)
+                        NProgress.done()
+                        next(false)
+                    })
+                }
             },
             {
                 path: 'record/list',
-                name: 'contestRecordList',
                 component: ContestRecordListView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    axios.get("/contests/" + to.params.id + "/permissions/enter")
+                        .then(() => {
+                            next()
+                        }).catch((error) => {
+                        router.app.$message.error(error.response.data)
+                        NProgress.done()
+                        next(false)
+                    })
+                }
             }
         ]
     },
     {
         path: '/contest/:contestId/record/:recordId',
-        name: 'contestRecord',
         component: ContestRecordView,
         props: true,
         beforeEnter: function (to, from, next) {
-            axios.get("/contests/" + to.params.contestId + "/records/" + to.params.recordId + "/check")
+            axios.get("/contests/" + to.params.contestId + "/records/" + to.params.recordId + "/permissions/get")
                 .then(() => {
                     next()
                 }).catch((error) => {
                 router.app.$message.error(error.response.data)
+                NProgress.done()
                 next(false)
             })
         }
     },
     {
         path: '/record/list',
-        name: 'recordList',
         component: RecordListView,
     },
     {
         path: '/record/:id',
         name: 'record',
         component: RecordView,
-        props: true
+        props: true,
+        beforeEnter: function (to, from, next) {
+            axios.get("/records/" + to.params.id + "/permissions/get")
+                .then(() => {
+                    next()
+                }).catch((error) => {
+                router.app.$message.error(error.response.data)
+                NProgress.done()
+                next(false)
+            })
+        }
+
     },
     {
         path: '/about',
@@ -194,8 +308,11 @@ const router = new VueRouter({
     base: process.env.BASE_URL,
     routes
 })
-// todo 做各页面的路由前鉴权
+
+NProgress.configure({showSpinner: false});
+
 router.beforeEach((to, from, next) => {
+    NProgress.start()
     axios.get("/accounts/loginStatus")
         .then((response) => {
             router.app.$root.loginStatus = response.data  // router.app对应Vue实例的this
@@ -206,14 +323,20 @@ router.beforeEach((to, from, next) => {
                     next();
                 } else {
                     router.app.$message.error("请先登录后查看")
+                    NProgress.done()
                     next(false)
                 }
             }
         })
         .catch((error) => {
             router.app.$message.error(error.response.data)
+            NProgress.done()
             next(false)
         })
+})
+
+router.afterEach(() => {
+    NProgress.done()
 })
 
 export default router

@@ -43,10 +43,10 @@
             <el-col :span="18">
               <el-menu :default-active="$route.fullPath" mode="horizontal" router active-text-color="#409EFF" text-color="#606266">
                 <el-menu-item :index="basePath">比赛详情</el-menu-item>
-                <el-menu-item :index="basePath + '/problem/list'" :disabled="!user.isAuthor && !user.isParticipant">
+                <el-menu-item :index="basePath + '/problem/list'" :disabled="!user.isAdmin && !user.isParticipant">
                   题目列表
                 </el-menu-item>
-                <el-submenu :disabled="!user.isAuthor && !user.isParticipant"
+                <el-submenu :disabled="!user.isAdmin && !user.isParticipant"
                             :index="basePath + '/problem'"
                             @click.native="goProblem">
                   <template #title>
@@ -56,8 +56,8 @@
                     <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{i}}
                   </el-menu-item>
                 </el-submenu>
-                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant" :index="basePath + '/record/list'">提交记录</el-menu-item>
-                <el-menu-item :disabled="!user.isAuthor && !user.isParticipant">排行榜</el-menu-item>
+                <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/record/list'">提交记录</el-menu-item>
+                <el-menu-item :disabled="!user.isAdmin && !user.isParticipant">排行榜</el-menu-item>
               </el-menu>
             </el-col>
             <el-col :span="6" style="display: flex; justify-content: flex-end;">
@@ -66,7 +66,7 @@
                 <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
                 编辑比赛
               </el-button>
-              <el-button v-if="!user.isAuthor && status!=='before'" type="warning" size="medium" plain
+              <el-button v-if="!user.isAdmin && status!=='before'" type="warning" size="medium" plain
                          style="margin-right: 20px" @click="showParticipateDialog = true"
                          :disabled="user.isParticipant">
                 <font-awesome-icon icon="fa-solid fa-flag" fixed-width></font-awesome-icon>
@@ -143,6 +143,7 @@ export default {
       user: {
         isAuthor: null,
         isParticipant: null,
+        isAdmin: null,
       }
     }
   },
@@ -250,17 +251,20 @@ export default {
     participate: function () {
       if (this.contest.passwordSet && (this.password === null || this.password === "")) {
         this.$message.error("请输入参赛密码");
+      } else if (this.nickname !== null && this.nickname.length > 30) {
+        this.$message.error("参赛昵称长度不能超过30");
+      } else {
+        axios.post("/contests/" + this.id + "/participate", {
+          "nickname": this.nickname,
+          "password": this.password
+        }).then(() => {
+          this.$message.success("参加比赛成功")
+          this.user.isParticipant = true
+          this.showParticipateDialog = false
+        }).catch((error) => {
+          this.$message.error(error.response.data)
+        })
       }
-      axios.post("/contests/" + this.id + "/participate", {
-        "nickname": this.nickname,
-        "password": this.password
-      }).then(() => {
-        this.$message.success("参加比赛成功")
-        this.user.isParticipant = true
-        this.showParticipateDialog = false
-      }).catch((error) => {
-        this.$message.error(error.response.data)
-      })
     },
     goProblem: function () {
       if(this.user.isAuthor || this.user.isParticipant) {
@@ -270,6 +274,7 @@ export default {
   },
   mounted: function () {
     this.loading = true
+    this.user.isAdmin = this.$root.loginStatus.role === "ADMIN"
     axios.get("/contests/" + this.id)
         .then((response) => {
           this.contest.id = response.data.id

@@ -218,7 +218,7 @@ export default {
         explanation: "",
         timeLimit: null,
         memoryLimit: null,
-        testSet: null,
+        testSet: true,
         visibility: null,
         samples: "",
         submit: null,

@@ -90,7 +90,6 @@
 
 <script>
 import axios from "@/utils/axios";
-import router from "@/router";
 
 export default {
   name: "UserProblemListView",
@@ -106,14 +105,6 @@ export default {
       showHidden: false,
       showPublic: false,
       problemEntries: []
-    }
-  },
-  beforeRouteEnter: function (to, from, next) { // todo 路由权限控制交由router.index.js进行
-    if (parseInt(to.params.id) === router.app.$root.loginStatus.userid) {
-      next()
-    } else {
-      router.app.$message.error("无权访问该页面")
-      next(false)
     }
   },
   methods: {

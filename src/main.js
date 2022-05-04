@@ -83,9 +83,10 @@ Vue.use(ScrollNumber, {transitionTime: 500})
 new Vue({
     data: {
         loginStatus: {  // Vue全局变量维护登录状态
-            login: null,
+            login: false,
             userid: null,
-            username: null
+            username: null,
+            role: null,
         }
     },
     router,
