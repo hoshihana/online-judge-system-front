@@ -8,6 +8,11 @@
               <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
               返回比赛
             </el-button>
+            <el-button type="danger" size="medium" plain>
+              <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon>
+              删除比赛
+            </el-button>
+            <!--todo 编写删除比赛的确认以及接口-->
             <el-button v-if="status !== 'before'" type="warning" size="medium" plain @click="showResetContestDialog = true">
               <font-awesome-icon icon="fa-solid fa-clock-rotate-left" fixed-width></font-awesome-icon> 重置比赛
             </el-button>

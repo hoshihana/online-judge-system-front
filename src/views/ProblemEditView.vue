@@ -18,7 +18,7 @@
         </el-row>
       </template>
       <el-tabs tab-position="left" stretch>
-        <el-tab-pane label="题目编辑">
+        <el-tab-pane label="题目信息编辑">
           <h3>题目名<b style="color: #F56C6C">*</b></h3>
           <el-input type="text" v-model="name" placeholder="题目名" maxlength="40" show-word-limit
                     style="width: 80%; margin: 15px"></el-input>
@@ -71,8 +71,8 @@
               <span style="font-size: larger"><i class="el-icon-warning"></i> 题目状态说明</span>
             </template>
             <ul style="padding-left: 10px; font-size: larger;">
-              <li><b>私密题目：</b>仅题目作者可见，其提交记录也是仅作者可见</li>
-              <li><b>练习/比赛题目：</b>仅题目作者和练习/比赛的参加者可见，其全部提交记录作者可见，当练习/比赛进行时，参加者仅能查看自己的提交记录，结束后则可以查看所有参加者的提交记录</li>
+              <li><b>私密题目：</b>仅管理员可见，其提交记录也是仅管理员可见</li>
+              <li><b>比赛题目：</b>仅管理员和比赛的参加者可见，其全部提交记录管理员可见，当比赛进行时，参加者仅能查看自己的提交记录，结束后则可以查看所有参加者的提交记录</li>
               <li><b>公开题目：</b>所有用户可见，其提交记录也是所有用户可见</li>
             </ul>
           </el-alert>

@@ -2,7 +2,9 @@
   <div style="margin: 10px auto auto; width: 450px">
     <el-card>
       <template #header>
-        <span>登录</span>
+        <div style="width: 100%; text-align: center">
+          <h1 style="margin: 0;">登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</h1>
+        </div>
       </template>
       <el-form :model="loginInfo" :rules="rules" status-icon hide-required-asterisk>
         <el-form-item label="用户名" prop="username">

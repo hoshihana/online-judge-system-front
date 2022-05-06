@@ -71,8 +71,6 @@ export default {
     this.$refs.cm.codemirror.setSize("auto", (document.documentElement.clientHeight - 290) + "px")
     this.$nextTick(() => {
       window.addEventListener('resize', () => {
-        //监听浏览器窗口大小改变
-        //浏览器变化执行动作
         this.$refs.cm.codemirror.setSize("auto", (document.documentElement.clientHeight - 290) + "px")
       });
     })

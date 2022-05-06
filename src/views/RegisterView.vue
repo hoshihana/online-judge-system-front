@@ -2,7 +2,9 @@
   <div style="margin: 10px auto auto; width: 450px">
     <el-card>
       <template #header>
-        <span>注册</span>
+        <div style="width: 100%; text-align: center">
+          <h1 style="margin: 0;">注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;册</h1>
+        </div>
       </template>
       <el-form :model="registerInfo" :rules="rules" ref="registerForm" status-icon hide-required-asterisk>
         <el-form-item label="用户名" prop="username">
