@@ -267,7 +267,7 @@ export default {
   methods: {
     update: function () {
       this.loading = true
-      axios.get("/problemEntries/user/" + this.$root.loginStatus.userid + "/all", {
+      axios.get("/problemEntries/users/" + this.$root.loginStatus.userid + "/all", {
         params: {
           "key": this.key,
           "showPrivate": this.showPrivate,

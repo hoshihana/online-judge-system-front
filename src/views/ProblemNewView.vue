@@ -191,10 +191,7 @@ export default {
           "visibility": this.visibility
         }).then((response) => {
           this.loading = false
-          this.$message({
-            message: "题目创建成功",
-            type: "success"
-          })
+          this.$message.success("题目创建成功")
           this.saved = true
           this.$router.replace("/problem/" + response.data)
         }).catch((error) => {

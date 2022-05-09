@@ -229,9 +229,10 @@ const routes = [
                 }
             },
             {
-                path: 'problem/:problemNumber',
+                path: 'problem/:number',
                 component: ContestProblemView,
                 props: true,
+                // todo 对私密题目的访问进行拦截
                 beforeEnter: function (to, from, next) {
                     axios.get("/contests/" + to.params.id + "/permissions/enter")
                         .then(() => {

@@ -183,7 +183,7 @@ import personalRecordListDialog from "@/components/PersonalRecordListDialog";
 
 export default {
   name: "ContestProblemView",
-  props: ["id", "problemNumber"],
+  props: ["id", "number"],
   inject: ["contest", "user"],
   components: {
     problemDetail,
@@ -206,6 +206,7 @@ export default {
 
       triedUserAmount: "--",
       passedUserAMount: "--",
+      problemNumber: null,
       problemDetail: null,
       codeSubmit: {
         code: "",
@@ -382,6 +383,7 @@ export default {
     }
   },
   mounted: function () {
+    this.problemNumber = this.number
     this.update();
     const timer = setInterval(() => {
       let refresh = false;

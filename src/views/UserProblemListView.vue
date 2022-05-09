@@ -110,7 +110,7 @@ export default {
   methods: {
     update: function () {
       this.loading = true;
-      axios.get("/problemEntries/user/" + this.id + "/amount", {
+      axios.get("/problemEntries/users/" + this.id + "/amount", {
         params: {
           "key": this.key,
           "showPrivate": this.showPrivate,
@@ -120,7 +120,7 @@ export default {
       }).then((response) => {
         this.total = response.data;
         this.pageIndex = Math.max(Math.min(this.pageIndex, Math.ceil(this.total / this.pageSize)), 1);
-        axios.get("/problemEntries/user/" + this.id, {
+        axios.get("/problemEntries/users/" + this.id, {
           params: {
             "key": this.key,
             "showPrivate": this.showPrivate,
