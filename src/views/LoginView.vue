@@ -6,7 +6,7 @@
           <h1 style="margin: 0;">登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</h1>
         </div>
       </template>
-      <el-form :model="loginInfo" :rules="rules" status-icon hide-required-asterisk>
+      <el-form ref="loginForm" :model="loginInfo" :rules="rules" status-icon hide-required-asterisk>
         <el-form-item label="用户名" prop="username">
           <el-input type="text" prefix-icon="el-icon-user" placeholder="请输入用户名" v-model="loginInfo.username"></el-input>
         </el-form-item>
@@ -43,17 +43,20 @@ export default {
     login: function () {
       if (this.$root.loginStatus.login) {
         this.$message.error("已登录，如需切换账号请先登出")
-      } else {
-        axios.post("/accounts/login", this.loginInfo)
-            .then((response) => {
-              this.$message.success("登录成功")
-              this.$root.loginStatus = response.data
-              this.$router.push("/")
-            })
-            .catch((error) => {
-              this.$message.error(error.response.data)
-            })
+        return
       }
+      this.$refs.loginForm.validate().then(() => {
+            axios.post("/accounts/login", this.loginInfo)
+                .then((response) => {
+                  this.$message.success("登录成功")
+                  this.$root.loginStatus = response.data
+                  this.$router.push("/")
+                })
+                .catch((error) => {
+                  this.$message.error(error.response.data)
+                })
+          }
+      )
     }
   }
 }

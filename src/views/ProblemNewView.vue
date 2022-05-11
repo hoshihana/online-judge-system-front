@@ -186,8 +186,8 @@ export default {
           "outputFormat": this.outputFormat,
           "explanation": this.explanation,
           "samples": JSON.stringify(this.samples),
-          "timeLimit": this.timeLimit,
-          "memoryLimit": this.memoryLimit,
+          "timeLimit": 500,
+          "memoryLimit": 128,
           "visibility": this.visibility
         }).then((response) => {
           this.loading = false

@@ -43,7 +43,7 @@ const routes = [
             if (router.app.$root.loginStatus.login) {
                 router.app.$message.error("已登录，如需切换账号请先登出")
                 NProgress.done()
-                next(false)
+                next('/')
             } else {
                 next()
             }
@@ -56,7 +56,7 @@ const routes = [
             if (router.app.$root.loginStatus.login) {
                 router.app.$message.error("已登录，如需注册账号请先登出")
                 NProgress.done()
-                next(false)
+                next('/')
             } else {
                 next()
             }

@@ -75,17 +75,24 @@ export default {
   },
   methods: {
     submit: function () {
-      axios.post("/accounts/register", this.$data.registerInfo)
-          .then((response) => {
-            this.$message({
-              message: response.data,
-              type: "success"
-            })
-            this.$router.push("/login")
-          })
-          .catch((error) => {
-            this.$message.error(error.response.data)
-          })
+      if (this.$root.loginStatus.login) {
+        this.$message.error("已登录，如需注册账号请先登出")
+        return
+      }
+      this.$refs.registerForm.validate().then( () => {
+            axios.post("/accounts/register", this.$data.registerInfo)
+                .then((response) => {
+                  this.$message({
+                    message: response.data,
+                    type: "success"
+                  })
+                  this.$router.push("/login")
+                })
+                .catch((error) => {
+                  this.$message.error(error.response.data)
+                })
+          }
+      )
     }
   }
 }
