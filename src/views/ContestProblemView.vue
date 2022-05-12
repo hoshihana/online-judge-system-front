@@ -29,7 +29,7 @@
             <el-tab-pane label="题目详情" name="problemDetail">
               <problem-detail :problemDetail="problemDetail"></problem-detail>
             </el-tab-pane>
-            <el-tab-pane :disabled="!problemDetail.testSet" label="代码提交" name="codeSubmit">
+            <el-tab-pane :disabled="!problemDetail.testSet || user.isAdmin" label="代码提交" name="codeSubmit">
               <code-editor v-loading="codeSubmitLoading" :code.sync="codeSubmit.code"
                            :language="codeSubmit.language"></code-editor>
               <div style="text-align: right">

@@ -86,19 +86,23 @@ export default {
     axios.get("/contests/" + this.id + "/problemEntries")
         .then((response) => {
           this.problemEntries = response.data
-          axios.get("/contests/" + this.id + "/users/" + this.$root.loginStatus.userid + "/status")
-              .then((response) => {
-                if (response.data.length > 0) {
-                  for (let i = 0; i < this.problemEntries.length; i++) {
-                    this.problemEntries[i].selfSubmit = response.data[i].submit
-                    this.problemEntries[i].selfAccept = response.data[i].accept
+          if(this.$root.loginStatus.role === "USER") {
+            axios.get("/contests/" + this.id + "/users/" + this.$root.loginStatus.userid + "/status")
+                .then((response) => {
+                  if (response.data.length > 0) {
+                    for (let i = 0; i < this.problemEntries.length; i++) {
+                      this.problemEntries[i].selfSubmit = response.data[i].submit
+                      this.problemEntries[i].selfAccept = response.data[i].accept
+                    }
                   }
-                }
-                this.loading = false
-              }).catch((error) => {
-            this.$message.error(error.response.data)
+                  this.loading = false
+                }).catch((error) => {
+              this.$message.error(error.response.data)
+              this.loading = false
+            })
+          } else {
             this.loading = false
-          })
+          }
         }).catch((error) => {
       this.$message.error(error.response.data)
       this.loading = false

@@ -267,7 +267,7 @@ export default {
       }
     },
     goProblem: function () {
-      if(this.user.isAuthor || this.user.isParticipant) {
+      if(this.user.isAdmin || this.user.isParticipant) {
         this.$router.push(this.basePath + '/problem/' + this.currentMenuProblemNumber)
       }
     }
