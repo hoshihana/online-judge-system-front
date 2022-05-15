@@ -9,7 +9,7 @@
           <top-bar></top-bar>
         </el-header>
         <el-main id="main" class="back-top-target" style="height: 100%; background-image: linear-gradient(to top, #dfe9f3 0%, white 100%);">
-          <router-view></router-view>
+          <router-view :key="this.$route.path"></router-view>
         </el-main>
         <el-backtop target=".back-top-target" :bottom="100" :right="20"></el-backtop>
       </el-container>

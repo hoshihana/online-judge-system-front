@@ -51,12 +51,14 @@ import {
     faScaleBalanced,
     faPen,
     faStopwatch,
-    faClockRotateLeft, faCalendarDays, faFlag, faCheck, faDice
+    faClockRotateLeft, faCalendarDays, faFlag, faCheck, faDice, faCamera
 } from '@fortawesome/free-solid-svg-icons'
 import {faCopy} from "@fortawesome/free-regular-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import moment from 'moment'
 import ScrollNumber from "vue-scroll-number";
+import multiavatar from '@multiavatar/multiavatar'
+import randimals from 'randimals'
 
 /* add icons to the library */
 library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
@@ -67,12 +69,14 @@ library.add(faCopy, faUser, faClock, faMemory, faCircleRight, faCircleCheck,
     faAnglesRight, faFileZipper, faBox, faHashtag, faCloudArrowDown, faArrowsRotate,
     faGears, faGrip, faCaretRight, faAnglesLeft, faLock, faList, faHourglassStart,
     faHourglassEnd, faUsers, faScaleBalanced, faStopwatch, faPen, faClockRotateLeft,
-    faCalendarDays, faFlag, faCheck, faDice)
+    faCalendarDays, faFlag, faCheck, faDice, faCamera)
 
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.prototype.$moment = moment
+Vue.prototype.$multiavatar = multiavatar
+Vue.prototype.$randimals = randimals
 
 Vue.config.productionTip = false
 
