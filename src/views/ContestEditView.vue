@@ -191,9 +191,8 @@
           <div style="margin: 15px">
             <el-switch v-model="passwordSet" active-text="需要密码" style="height: 40px"
                        :disabled="status === 'after'"></el-switch>
-            <el-input v-if="passwordSet" v-loading="passwordLoading" type="password" placeholder="密码：6到16位的数字或字母" v-model="password"
-                      :readonly="status === 'after'" show-password
-                      style="margin: 0 10px; height: 40px; width: 25%"></el-input>
+            <el-input v-if="passwordSet" v-loading="passwordLoading" type="text" placeholder="密码：6到16位的数字或字母" v-model="password"
+                      :readonly="status === 'after'" style="margin: 0 10px; height: 40px; width: 25%"></el-input>
           </div>
           <div style="text-align: right">
             <el-tooltip placement="top" :disabled="status === 'before'">
