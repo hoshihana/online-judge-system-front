@@ -50,14 +50,16 @@
                             :index="basePath + '/problem'"
                             @click.native="goProblem">
                   <template #title>
-                    <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{ currentMenuProblemNumber}}
+                    <b><font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{ currentMenuProblemNumber}}</b>
                   </template>
-                  <el-menu-item v-for="i in contest.problemAmount" :index="basePath + '/problem/' + i" :key="i" style="width: 50px">
-                    <font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{i}}
+                  <el-menu-item v-for="i in contest.problemAmount" :index="basePath + '/problem/' + i" :key="i" style="width: 100%">
+                    <div class="problem-number">
+                      <b><font-awesome-icon icon="fa-solid fa-caret-right" fixed-width></font-awesome-icon> {{i}}</b>
+                    </div>
                   </el-menu-item>
                 </el-submenu>
                 <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/record/list'">提交记录</el-menu-item>
-                <el-menu-item :disabled="!user.isAdmin && !user.isParticipant">排行榜</el-menu-item>
+                <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/rank'">排行榜</el-menu-item>
               </el-menu>
             </el-col>
             <el-col :span="6" style="display: flex; justify-content: flex-end;">
@@ -352,8 +354,20 @@ export default {
   border-left: 2px dashed #a8a8a8;
 }
 
-::v-deep .el-menu-item:hover{
+::v-deep .el-menu {
+  min-width: 90px !important;
+}
+
+::v-deep .el-submenu__title:hover {
+  color: #409EFF !important;
+}
+
+::v-deep .el-menu-item:hover {
   outline: 0 !important;
   color: #409EFF !important;
+}
+
+.problem-number:hover {
+  color: #409EFF
 }
 </style>

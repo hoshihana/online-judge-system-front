@@ -27,6 +27,7 @@ import ContestRecordView from "@/views/ContestRecordView";
 import ContestRecordListView from "@/views/ContestRecordListView";
 import ContestNewView from "@/views/ContestNewView";
 import ProblemNewView from "@/views/ProblemNewView";
+import ContestRankView from "@/views/ContestRankView";
 
 Vue.use(VueRouter)
 
@@ -247,6 +248,21 @@ const routes = [
             {
                 path: 'record/list',
                 component: ContestRecordListView,
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    axios.get("/contests/" + to.params.id + "/permissions/enter")
+                        .then(() => {
+                            next()
+                        }).catch((error) => {
+                        router.app.$message.error(error.response.data)
+                        NProgress.done()
+                        next(false)
+                    })
+                }
+            },
+            {
+                path: 'rank',
+                component: ContestRankView,
                 props: true,
                 beforeEnter: function (to, from, next) {
                     axios.get("/contests/" + to.params.id + "/permissions/enter")
