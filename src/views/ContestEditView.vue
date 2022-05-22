@@ -34,7 +34,7 @@
                                 end-placeholder="比赛结束时间"></el-date-picker>
               </div>
               <div style="font-size: medium; color: #F56C6C; margin-top: 25px; text-align: center">
-                <i class="el-icon-warning"></i> 注意：重置比赛将会删除该比赛的所有参赛记录和提交记录
+                <i class="el-icon-warning"></i> 注意：重置比赛将会删除该比赛当前所有的参赛记录和提交记录
               </div>
               <template #footer>
                 <div>
@@ -65,10 +65,13 @@
                 比赛尚未开始，各项内容均可作修改
               </span>
               <span v-if="status === 'ongoing'">
-                比赛正在进行中，无法修改题目列表，如有需要请“重置比赛”
+                比赛正在进行中，无法修改题目列表，如有需要请"重置比赛"
               </span>
-              <span v-if="status === 'after'">
-                比赛已经结束，无法修改比赛信息和题目列表，如有需要请“修改比赛结束时间”或“重置比赛”
+              <span v-if="status === 'after' && !open">
+                比赛已经结束但未开放，无法修改比赛信息和题目列表，且用户不可参赛或提交，如有需要请"修改比赛结束时间"、"开放比赛"或"重置比赛"
+              </span>
+              <span v-if="status === 'after' && open">
+                比赛已经结束且已开放，无法修改比赛信息和题目列表，用户可参赛或提交但不会改变排行榜，如有需要请"重置比赛"
               </span>
             </div>
           </el-alert>
@@ -162,14 +165,14 @@
             <el-descriptions-item>
               <template slot="label">
                 <font-awesome-icon icon="fa-solid fa-users" fixed-width></font-awesome-icon>
-                参加人数<!--todo 增加查看按钮-->
+                参加人数
               </template>
               {{ status === "before" ? "--" : participantAmount }}
             </el-descriptions-item>
             <el-descriptions-item>
               <template slot="label">
                 <font-awesome-icon icon="fa-solid fa-list" fixed-width></font-awesome-icon>
-                题目数<!--todo 增加查看题目按钮-->
+                题目数
               </template>
               {{ problemAmount === 0 ? "--" : problemAmount }}
             </el-descriptions-item>
@@ -449,6 +452,7 @@ export default {
       participantAmount: null,
       passwordSet: false,
       password: "",
+      open: "",
       key: "",
       showPrivate: false,
       showHidden: true,
@@ -472,7 +476,11 @@ export default {
       if (this.status === "before") {
         return "未开始"
       } else if (this.status === "after") {
-        return "已结束"
+        if(this.open) {
+          return "已结束 (已开放)"
+        } else {
+          return "已结束 (未开放)"
+        }
       } else {
         return "进行中"
       }
@@ -481,7 +489,11 @@ export default {
       if (this.status === "before") {
         return "距离比赛开始还有：" + this.formatTimeInterval(this.startTime - this.current)
       } else if (this.status === "after") {
-        return "比赛已结束"
+        if(this.open) {
+          return "比赛已结束且已开放"
+        } else {
+          return "比赛已结束但未开放"
+        }
       } else {
         return "距离比赛结束还有：" + this.formatTimeInterval(this.endTime - this.current)
       }
@@ -762,6 +774,7 @@ export default {
           this.problemAmount = response.data.problemAmount
           this.participantAmount = response.data.participantAmount
           this.passwordSet = response.data.passwordSet
+          this.oepn = response.data.open
           this.loading = false
           if (this.passwordSet) {
             this.passwordLoading = true

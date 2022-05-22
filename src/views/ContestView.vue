@@ -59,7 +59,10 @@
                   </el-menu-item>
                 </el-submenu>
                 <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/record/list'">提交记录</el-menu-item>
-                <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/rank'">排行榜</el-menu-item>
+                <el-tooltip :content="'该排行榜已在 ' + $moment(contest.endTime).format('yyyy-MM-DD HH:mm') + ' 比赛结束时封榜'"
+                            :disabled="this.status !== 'after'">
+                  <el-menu-item :disabled="!user.isAdmin && !user.isParticipant" :index="basePath + '/rank'">排行榜</el-menu-item>
+                </el-tooltip>
               </el-menu>
             </el-col>
             <el-col :span="6" style="display: flex; justify-content: flex-end;">
@@ -134,6 +137,7 @@ export default {
         problemAmount: null,
         participantAmount: null,
         passwordSet: false,
+        open: false,
       },
       currentMenuProblemNumber: 1,
       showParticipateDialog: false,
@@ -169,7 +173,12 @@ export default {
       if (this.status === "before") {
         return "未开始"
       } else if (this.status === "after") {
-        return "已结束"
+        if(this.contest.open) {
+          return "已结束 (已开放)"
+        } else {
+          return "已结束 (未开放)"
+        }
+
       } else {
         return "进行中"
       }
@@ -178,7 +187,11 @@ export default {
       if (this.status === "before") {
         return "距离比赛开始还有：" + this.formatTimeInterval(this.contest.startTime - this.current, true)
       } else if (this.status === "after") {
-        return "比赛已结束"
+        if(this.contest.open) {
+          return "比赛已结束且已开放，但不会改变排行榜"
+        } else {
+          return "比赛已结束但未开放，不可参赛或提交"
+        }
       } else {
         return "距离比赛结束还有：" + this.formatTimeInterval(this.contest.endTime - this.current, true)
       }
@@ -292,6 +305,7 @@ export default {
           this.contest.problemAmount = response.data.problemAmount
           this.contest.participantAmount = response.data.participantAmount
           this.contest.passwordSet = response.data.passwordSet
+          this.contest.open = response.data.open
           this.user.isAuthor = this.contest.authorId === this.$root.loginStatus.userid
           this.loading = false
           // 初始化currentMenuProblemNumber
@@ -335,8 +349,7 @@ export default {
 
 .status-tag {
   vertical-align: center;
-  padding: 0;
-  width: 90px;
+  padding: 0 20px;
   height: 40px;
   font-size: medium;
   text-align: center;
