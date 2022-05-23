@@ -71,12 +71,16 @@
                 <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
                 编辑比赛
               </el-button>
-              <el-button v-if="!user.isAdmin && status!=='before'" type="warning" size="medium" plain
-                         style="margin-right: 20px" @click="showParticipateDialog = true"
-                         :disabled="user.isParticipant">
-                <font-awesome-icon icon="fa-solid fa-flag" fixed-width></font-awesome-icon>
-                {{ user.isParticipant ? "已参赛" : "参加比赛" }}
-              </el-button>
+              <el-tooltip placement="bottom" content="比赛已结束但未开放，无法参赛" :disabled="status !== 'after' || contest.open || user.isParticipant">
+                <div style="display:inline-block; margin-right: 20px">
+                  <el-button v-if="!user.isAdmin && status!=='before'" type="warning" size="medium" plain
+                             @click="showParticipateDialog = true"
+                             :disabled="user.isParticipant || (status === 'after' && !contest.open)">
+                    <font-awesome-icon icon="fa-solid fa-flag" fixed-width></font-awesome-icon>
+                    {{ user.isParticipant ? "已参赛" : "参加比赛" }}
+                  </el-button>
+                </div>
+              </el-tooltip>
               <el-dialog :visible.sync="showParticipateDialog" width="40%" :destroy-on-close="true"
                          @open="nickname = password = null">
                 <template #title>
@@ -141,8 +145,8 @@ export default {
       },
       currentMenuProblemNumber: 1,
       showParticipateDialog: false,
-      nickname: null,
-      password: null,
+      nickname: "",
+      password: "",
       current: null,
       timer: null,
       status: "before",

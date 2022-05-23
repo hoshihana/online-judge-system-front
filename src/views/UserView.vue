@@ -105,7 +105,20 @@ export default {
       avatarLoading: false,
       schoolLoading: false,
       newSchool: "",
-      account: null,
+      account: {
+        id: null,
+        username: null,
+        email: null,
+        role: null,
+        avatar: null,
+        school: null,
+        profile: null,
+      },
+    }
+  },
+  provide: function () {
+    return {
+      account: this.account
     }
   },
   computed: {
@@ -162,7 +175,13 @@ export default {
   mounted: function () {
     this.loading = true
     axios.get("/accounts/" + this.id).then((response) => {
-      this.account = response.data
+      this.account.id = response.data.id
+      this.account.username = response.data.username
+      this.account.email = response.data.email
+      this.account.role = response.data.role
+      this.account.avatar = response.data.avatar
+      this.account.school = response.data.school
+      this.account.profile = response.data.profile
       this.loading = false
     }).catch((error) => {
       this.$message.error(error.response.data)

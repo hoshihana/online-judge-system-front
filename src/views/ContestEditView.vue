@@ -8,11 +8,10 @@
               <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
               返回比赛
             </el-button>
-            <el-button type="danger" size="medium" plain>
+            <el-button type="danger" size="medium" plain @click="deleteContest">
               <font-awesome-icon icon="fa-solid fa-trash-can"></font-awesome-icon>
               删除比赛
             </el-button>
-            <!--todo 编写删除比赛的确认以及接口-->
             <el-button v-if="status !== 'before'" type="warning" size="medium" plain @click="showResetContestDialog = true">
               <font-awesome-icon icon="fa-solid fa-clock-rotate-left" fixed-width></font-awesome-icon> 重置比赛
             </el-button>
@@ -104,7 +103,7 @@
                 </div>
               </template>
             </el-dialog>
-            <el-button v-if="status !== 'before'" type="primary" size="medium" plain style="margin: 0 10px"
+            <el-button v-if="status !== 'before' && !open" type="primary" size="medium" plain style="margin: 0 10px"
                        @click="showUpdateEndTimeDialog = true">
               <font-awesome-icon icon="fa-solid fa-pen" fixed-width></font-awesome-icon>
               修改结束时间
@@ -130,6 +129,10 @@
                 </div>
               </template>
             </el-dialog>
+            <el-button v-if="status === 'after'" type="warning" size="medium" plain style="margin: 0 10px" :disabled="openContestLoading || open" @click="openContest">
+              <font-awesome-icon icon="fa-solid fa-door-open" fixed-width></font-awesome-icon>
+              {{ open ? "比赛已开放" : "开放比赛"}}
+            </el-button>
           </h3>
           <el-descriptions style="margin: 15px 15px 25px; width: 80%" :column="3" border>
             <el-descriptions-item>
@@ -389,6 +392,7 @@ export default {
       passwordLoading: false,
       selectedProblemListLoading: false,
       problemListLoading: false,
+      openContestLoading: false,
       saved: false,
       activeName: "contestDetail",
       statusBgColor: "",
@@ -452,7 +456,7 @@ export default {
       participantAmount: null,
       passwordSet: false,
       password: "",
-      open: "",
+      open: false,
       key: "",
       showPrivate: false,
       showHidden: true,
@@ -741,6 +745,43 @@ export default {
           this.$message.error(error.response.data)
         })
       }
+    },
+    openContest: function () {
+      this.$confirm('此操作将开放比赛，开放后将无法取消开放或修改比赛时间(可重置比赛)，用户可以继续参赛或提交，但不会改变排行榜, 是否继续?', '确认信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.openContestLoading = true
+        axios.post("/contests/" + this.id + "/open")
+            .then(() => {
+              this.openContestLoading = false
+              this.$message.success('开放比赛成功')
+              this.open = true
+            }).catch((error) => {
+          this.openContestLoading = false
+          this.$message.error(error.response.data)
+        })
+      })
+    },
+    deleteContest: function () {
+      this.$confirm('此操作将永久删除该比赛及其参赛记录和提交记录, 是否继续?', '确认信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        axios.delete("/contests/" + this.id)
+            .then(() => {
+              this.loading = false
+              this.$message.success("比赛删除成功")
+              this.saved = true
+              this.$router.replace("/user/" + this.$root.loginStatus.userid + "/contest/list")
+            }).catch((error) => {
+          this.loading = false
+          this.$message.error(error.response.data)
+        })
+      })
     }
   },
   beforeRouteLeave: function (to, from, next) {
@@ -774,7 +815,7 @@ export default {
           this.problemAmount = response.data.problemAmount
           this.participantAmount = response.data.participantAmount
           this.passwordSet = response.data.passwordSet
-          this.oepn = response.data.open
+          this.open = response.data.open
           this.loading = false
           if (this.passwordSet) {
             this.passwordLoading = true

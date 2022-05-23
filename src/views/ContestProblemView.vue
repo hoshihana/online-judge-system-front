@@ -43,10 +43,14 @@
                       :value="option.value">
                   </el-option>
                 </el-select>
-                <el-button type="danger" size="medium" style="margin-top: 20px" plain @click="submitCode">
-                  <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon>
-                  提交
-                </el-button>
+                <el-tooltip placement="top" content="比赛已结束但未开放，无法提交" :disabled="new Date() < contest.endTime || contest.open">
+                  <div style="display:inline-block; margin-top: 20px">
+                    <el-button type="danger" size="medium" plain @click="submitCode" :disabled="new Date() >= contest.endTime && !contest.open">
+                      <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon>
+                      提交
+                    </el-button>
+                  </div>
+                </el-tooltip>
               </div>
             </el-tab-pane>
           </el-tabs>

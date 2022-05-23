@@ -390,12 +390,11 @@ export default {
                 message: '题目删除成功'
               });
               this.saved = true
-              this.$router.go(-1)
+              this.$router.replace("/user/" + this.$root.loginStatus.userid + "/problem/list")
             }).catch((error) => {
           this.loading = false
           this.$message.error(error.response.data)
         })
-      }).catch(() => {
       })
     },
     backToProblem: function () {

@@ -127,7 +127,7 @@ export default {
       newNickname: "",
       total: 0,
       pageIndex: 1,
-      pageSize: 50,
+      pageSize: 20,
     }
   },
   methods: {

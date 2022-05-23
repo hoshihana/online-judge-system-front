@@ -46,8 +46,7 @@
         <el-table-column label="#" align="center">
           <template #default="scope">
             <router-link v-if="checkRecord(scope.row)"
-                         class="el-link el-link--primary" :to="'/contest/' + id + '/record/' + scope.row.id"
-                         target="_blank">{{ scope.row.id }}
+                         class="el-link el-link--primary" :to="'/contest/' + id + '/record/' + scope.row.id">{{ scope.row.id }}
             </router-link>
             <span v-else>
               {{ scope.row.id }}
@@ -117,8 +116,6 @@
 
 <script>
 import axios from "@/utils/axios";
-
-// todo 仅个人可见记录不可点进去
 
 export default {
   name: "ContestRecordListView",
@@ -323,10 +320,7 @@ export default {
       this.update()
     },
     goRecord: function (recordId) {
-      let routeUrl = this.$router.resolve({
-        path: "/contest/" + this.id + "/record/" + recordId,
-      });
-      window.open(routeUrl.href, '_blank');
+      this.$router.push("/contest/" + this.id + "/record/" + recordId)
     },
     checkRecord: function (record) {
       if(this.contest.authorId === this.$root.userid || record.userid === this.$root.userid) {
