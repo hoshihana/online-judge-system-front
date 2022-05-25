@@ -10,12 +10,17 @@
                     style="font-size: x-large">{{ id + '-' + problemNumber + ' ' + problemDetail.name}}</b></span>
               </el-col>
               <el-col :span="12" style="text-align: right; float: right">
+                <el-button v-if="$root.loginStatus.role === 'ADMIN'" size="medium" plain
+                           @click="goProblem">
+                  <font-awesome-icon icon="fa-solid fa-link" fixed-width></font-awesome-icon>
+                  跳转至原题目
+                </el-button>
                 <el-tooltip content="测试点尚未配置" placement="left" effect="light"
                             :disabled="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
                   <el-badge is-dot
                             :hidden="problemDetail.authorId !== $root.loginStatus.userid || problemDetail.testSet">
                     <el-button v-if="problemDetail.authorId === $root.loginStatus.userid" type="primary" size="medium"
-                               plain
+                               plain style="margin-left: 20px"
                                @click="editProblem">
                       <font-awesome-icon icon="fa-solid fa-pen-to-square" fixed-width></font-awesome-icon>
                       编辑题目
@@ -382,6 +387,12 @@ export default {
     goRecord: function (recordId) {
       let routeUrl = this.$router.resolve({
         path: "/contest/" + this.id + "/record/" + recordId,
+      });
+      window.open(routeUrl.href, '_blank');
+    },
+    goProblem: function () {
+      let routeUrl = this.$router.resolve({
+        path: "/problem/" + this.problemDetail.id
       });
       window.open(routeUrl.href, '_blank');
     }

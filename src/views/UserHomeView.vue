@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card>
+    <el-card v-loading="account.profile === null || loading" body-style="padding: 2px 0 0 0">
       <template #header>
         <el-row align="middle" type="flex">
           <el-col :span="12" style="text-align: left; color: #909399;">
@@ -16,16 +16,16 @@
               <font-awesome-icon icon="fa-solid fa-xmark" fixed-width></font-awesome-icon>
               取消
             </el-button>
-            <el-button v-if="isSelf && editing" type="primary" size="medium" plain style="margin-right: 20px">
+            <el-button v-if="isSelf && editing" type="primary" size="medium" plain style="margin-right: 20px" @click="saveEditProfile">
               <font-awesome-icon icon="fa-solid fa-floppy-disk" fixed-width></font-awesome-icon>
               保存
             </el-button>
           </el-col>
         </el-row>
       </template>
-      <mavon-editor v-if="!editing" class="preview" style="min-height: 500px" :value="account.profile" :box-shadow="false" previewBackground="#ffffff"
+      <mavon-editor v-if="!editing" style="min-height: 600px; border: none" :value="account.profile" :box-shadow="false" previewBackground="#ffffff"
                     :subfield="false" default-open="preview" :toolbars-flag="false" :short-cut="false"></mavon-editor>
-      <mavon-editor v-else v-model="newProfile" :toolbars="toolbars" :xssOptions="{}" :autofocus="false" style="min-height: 500px"></mavon-editor>
+      <mavon-editor v-else v-model="newProfile" :toolbars="toolbars" :xssOptions="{}" :autofocus="false" style="min-height: 600px"></mavon-editor>
     </el-card>
   </div>
 </template>
@@ -33,6 +33,7 @@
 <script>
 import {mavonEditor} from "mavon-editor";
 import 'mavon-editor/dist/css/index.css'
+import axios from "@/utils/axios";
 
 export default {
   name: "UserHomeView",
@@ -43,6 +44,7 @@ export default {
   },
   data: function () {
     return {
+      loading: false,
       editing: false,
       newProfile: "",
       toolbars: {
@@ -90,6 +92,21 @@ export default {
     cancelEditProfile: function () {
       this.newProfile = ""
       this.editing = false
+    },
+    saveEditProfile: function () {
+      this.loading = true
+      this.editing = false
+      axios.patch("/accounts/profile", {
+        "profile": this.newProfile
+      }).then(() => {
+        this.$message.success("个人简介编辑成功")
+        this.account.profile = this.newProfile
+        this.loading = false
+      }).catch((error) => {
+        this.$message.error(error.response.data)
+        this.loading = false
+        this.newProfile = ""
+      })
     }
   },
   computed: {

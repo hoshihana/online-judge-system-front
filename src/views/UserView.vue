@@ -3,7 +3,7 @@
     <el-container>
       <el-header height="auto" style="padding-left: 0; padding-right: 0">
         <el-card v-loading="loading" body-style="padding: 0">
-          <el-row style="padding: 20px" class="user-card">
+          <el-row style="padding: 20px" class="user-card" type="flex">
             <el-col :span="12" style="display: flex; align-items: center; text-align: left;">
               <el-avatar v-loading="avatarLoading" v-html="avatarSvg" class="avatar" :size="100">
               </el-avatar>
@@ -29,7 +29,8 @@
                       </el-button>
                     </el-col>
                   </el-row>
-                  <el-input v-model="newAvatar" placeholder="随便输入点什么吧~" :clearable="true" maxlength="40" show-word-limit></el-input>
+                  <el-input v-model="newAvatar" placeholder="随便输入点什么吧~" :clearable="true" maxlength="40"
+                            show-word-limit></el-input>
                 </div>
                 <template #footer>
                   <div>
@@ -40,15 +41,16 @@
               </el-dialog>
               <div style="margin-left: 20px">
                 <div style="display: flex; align-items: center; margin-bottom: 10px">
-                  <b style="font-size: x-large">{{account.username}} </b>
+                  <b style="font-size: x-large">{{ account.username }} </b>
                   <el-tag v-if="account.role === 'ADMIN'" size="small" style="margin-left: 10px">管理员</el-tag>
                   <el-tag v-else type="info" size="small" style="margin-left: 10px">普通用户</el-tag>
                 </div>
                 <div>
-                  <span style="font-size: small">{{account.school || ''}} </span>
-                  <el-button v-if="isSelf" type="text" style="padding: 0; min-height: 0" @click="showEditSchoolDialog = true" :disabled="schoolLoading">
+                  <span style="font-size: small">{{ account.school || '' }} </span>
+                  <el-button v-if="isSelf" type="text" style="padding: 0; min-height: 0"
+                             @click="showEditSchoolDialog = true" :disabled="schoolLoading">
                     <font-awesome-icon icon="fa-solid fa-pen-to-square"></font-awesome-icon>
-                    {{account.school === null || account.school === "" ? "填写学校" : ""}}
+                    {{ account.school === null || account.school === "" ? "填写学校" : "" }}
                   </el-button>
                   <el-dialog :visible.sync="showEditSchoolDialog" width="500px" :destroy-on-close="true"
                              @open="newSchool = account.school || ''">
@@ -58,7 +60,8 @@
                     </template>
                     <div style="margin: 0 15px;">
                       <div style="font-size: small; color: #909399; margin-bottom: 10px">请输入所在学校的名称，可以为空</div>
-                      <el-input v-model="newSchool" placeholder="学校名称" :clearable="true" maxlength="40" show-word-limit></el-input>
+                      <el-input v-model="newSchool" placeholder="学校名称" :clearable="true" maxlength="40"
+                                show-word-limit></el-input>
                     </div>
                     <template #footer>
                       <div>
@@ -70,15 +73,46 @@
                 </div>
               </div>
             </el-col>
-            <el-col :span="12" style="text-align: right"></el-col>
+            <el-col :span="12" style="position: relative;">
+              <div style="position: absolute; bottom: 0; right: 0; color: #606266; font-size: small">
+                <div class="account-status">
+                  <span style="line-height: 2">通过题目</span><br>
+                  <b>{{ account.passedProblemAmount }}</b>
+                </div>
+                <div class="vertical-divider"></div>
+                <div class="account-status">
+                  <span style="line-height: 2">尝试题目</span><br>
+                  <b>{{ account.triedProblemAmount }}</b>
+                </div>
+                <template v-if="account.role === 'ADMIN'">
+                  <div class="vertical-divider"></div>
+                  <div class="account-status" :class="{'pointer-number': isSelf}" @click="clickOwnedProblemAmount">
+                    <span style="line-height: 2">创建题目</span><br>
+                    <b>{{ account.ownedProblemAmount }}</b>
+                  </div>
+                  <div class="vertical-divider"></div>
+                  <div class="account-status"  :class="{'pointer-number': isSelf}" @click="clickOwnedContestAmount">
+                    <span style="line-height: 2">创建比赛</span><br>
+                    <b>{{ account.ownedContestAmount }}</b>
+                  </div>
+                </template>
+                <template v-if="account.role === 'USER'">
+                  <div class="vertical-divider"></div>
+                  <div class="account-status">
+                    <span style="line-height: 2">参加比赛</span><br>
+                    <b>{{ account.participatedContestAmount }}</b>
+                  </div>
+                </template>
+              </div>
+            </el-col>
           </el-row>
           <el-row style="padding: 0 10px">
             <el-menu :default-active="$route.fullPath" mode="horizontal" router active-text-color="#409EFF"
                      text-color="#606266">
               <el-menu-item :index="basePath">主页</el-menu-item>
-              <el-menu-item v-if="isSelf" :index="basePath + '/profile'">个人信息</el-menu-item>
               <el-menu-item v-if="isSelf && isAdmin" :index="basePath + '/problem/list'">我的题目</el-menu-item>
               <el-menu-item v-if="isSelf && isAdmin" :index="basePath + '/contest/list'">我的比赛</el-menu-item>
+              <el-menu-item v-if="isSelf" :index="basePath + '/password'">修改密码</el-menu-item>
             </el-menu>
           </el-row>
         </el-card>
@@ -113,6 +147,11 @@ export default {
         avatar: null,
         school: null,
         profile: null,
+        passedProblemAmount: null,
+        triedProblemAmount: null,
+        participatedContestAmount: null,
+        ownedProblemAmount: null,
+        ownedContestAmount: null,
       },
     }
   },
@@ -140,7 +179,7 @@ export default {
   },
   methods: {
     changeAvatar: function () {
-      if(this.newAvatar === "") {
+      if (this.newAvatar === "") {
         this.$message.error("输入内容不能为空")
         return
       }
@@ -170,6 +209,16 @@ export default {
         this.$message.error(error.response.data)
         this.schoolLoading = false
       })
+    },
+    clickOwnedProblemAmount: function () {
+      if(this.isSelf) {
+        this.$router.push("/user/" + this.id + "/problem/list")
+      }
+    },
+    clickOwnedContestAmount: function () {
+      if(this.isSelf) {
+        this.$router.push("/user/" + this.id + "/contest/list")
+      }
     }
   },
   mounted: function () {
@@ -182,6 +231,11 @@ export default {
       this.account.avatar = response.data.avatar
       this.account.school = response.data.school
       this.account.profile = response.data.profile
+      this.account.passedProblemAmount = response.data.passedProblemAmount
+      this.account.triedProblemAmount = response.data.triedProblemAmount
+      this.account.participatedContestAmount = response.data.participatedContestAmount
+      this.account.ownedProblemAmount = response.data.ownedProblemAmount
+      this.account.ownedContestAmount = response.data.ownedContestAmount
       this.loading = false
     }).catch((error) => {
       this.$message.error(error.response.data)
@@ -229,4 +283,22 @@ export default {
 .avatar-mask:hover {
   opacity: 80%;
 }
+
+.vertical-divider {
+  display: inline-block;
+  width: 0;
+  height: 40px;
+  border-left: 2px dashed #a8a8a8;
+}
+
+.account-status {
+  display: inline-block;
+  text-align: center;
+  padding: 0 10px
+}
+
+.pointer-number {
+  cursor: pointer;
+}
+
 </style>

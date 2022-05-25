@@ -13,7 +13,6 @@ import axios from "@/utils/axios";
 import ProblemEditView from "@/views/ProblemEditView";
 import UserView from "@/views/UserView";
 import UserHomeView from "@/views/UserHomeView";
-import UserProfileView from "@/views/UserProfileView";
 import UserProblemListView from "@/views/UserProblemListView";
 import RecordView from "@/views/RecordView";
 import ContestListView from "@/views/ContestListView";
@@ -28,6 +27,7 @@ import ContestRecordListView from "@/views/ContestRecordListView";
 import ContestNewView from "@/views/ContestNewView";
 import ProblemNewView from "@/views/ProblemNewView";
 import ContestRankView from "@/views/ContestRankView";
+import UserPasswordView from "@/views/UserPasswordView";
 
 Vue.use(VueRouter)
 
@@ -118,15 +118,25 @@ const routes = [
             {
                 path: '',
                 component: UserHomeView,
-                props: true
+                props: true,
+                beforeEnter: function (to, from, next) {
+                    axios.get("/accounts/" + to.params.id)
+                        .then(() => {
+                            next()
+                        }).catch((error) => {
+                        router.app.$message.error(error.response.data)
+                        NProgress.done()
+                        next(false)
+                    })
+                }
             },
             {
-                path: 'profile',
-                component: UserProfileView,
+                path: 'password',
+                component: UserPasswordView,
                 props: true,
                 beforeEnter: function (to, from, next) {
                     if (router.app.$root.loginStatus.userid !== parseInt(to.params.id)) {
-                        router.app.$message.error("无权查看他人个人信息")
+                        router.app.$message.error("无权修改他人密码")
                         NProgress.done()
                         next(false)
                     } else {
@@ -233,9 +243,8 @@ const routes = [
                 path: 'problem/:number',
                 component: ContestProblemView,
                 props: true,
-                // todo 对私密题目的访问进行拦截
                 beforeEnter: function (to, from, next) {
-                    axios.get("/contests/" + to.params.id + "/permissions/enter")
+                    axios.get("/contests/" + to.params.id + "/problems/" + to.params.number + "/permissions/get")
                         .then(() => {
                             next()
                         }).catch((error) => {
