@@ -120,6 +120,12 @@
             </el-col>
           </el-row>
         </el-card>
+        <el-card v-if="user.isAdmin" style="margin-bottom: 20px" :body-style="{'padding': '0 15px'}">
+          <template #header>
+            <h3 style="margin: 5px 0">通过情况</h3>
+          </template>
+          <ve-pie :data="chartData" :settings="chartSettings" style="margin-top: 20px; height: 280px"></ve-pie>
+        </el-card>
         <el-card v-if="user.isParticipant " style="margin-bottom: 20px" :body-style="{'padding': '0 15px'}">
           <template #header>
             <el-row align="middle" type="flex">
@@ -189,6 +195,8 @@ import axios from "@/utils/axios";
 import problemDetail from "@/components/ProblemDetail";
 import codeEditor from "@/components/CodeEditor";
 import personalRecordListDialog from "@/components/PersonalRecordListDialog";
+import VePie from "v-charts/lib/pie.common"
+import "echarts/lib/component/title";
 
 export default {
   name: "ContestProblemView",
@@ -197,7 +205,8 @@ export default {
   components: {
     problemDetail,
     codeEditor,
-    personalRecordListDialog
+    personalRecordListDialog,
+    VePie
   },
   data: function () {
     return {
@@ -207,7 +216,19 @@ export default {
       currentTab: "problemDetail",
       checkMoreRecords: false,
       dialogKey: new Date(),
-
+      chartData: {
+        columns: ["key", "value"],
+        rows: []
+      },
+      chartSettings: {
+        labelLine: {
+          show: false
+        },
+        label: {
+          show:false
+        },
+        offsetY: 150,
+      },
       submit: "--",
       accept: "--",
       limit: 3,
@@ -254,6 +275,8 @@ export default {
       axios.get("/contests/" + this.id + "/problems/" + this.problemNumber)
           .then((response) => {
             this.problemDetail = response.data
+            this.chartData.rows.push({key: "通过", value: this.problemDetail.accept})
+            this.chartData.rows.push({key: "未通过", value: this.problemDetail.submit - this.problemDetail.accept})
             this.loading = false
             // 异步获取该题提交和通过人数
             axios.get("/contests/" + this.id + "/problems/" + this.problemNumber + "/status"
