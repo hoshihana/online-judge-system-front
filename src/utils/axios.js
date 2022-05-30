@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = 'http://localhost:8088';
+axios.defaults.baseURL = process.env.VUE_APP_BASE_URL
 axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
 axios.defaults.withCredentials = true;
 axios.defaults.transformRequest = [function (data) {

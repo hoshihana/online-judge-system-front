@@ -28,11 +28,11 @@ import ContestNewView from "@/views/ContestNewView";
 import ProblemNewView from "@/views/ProblemNewView";
 import ContestRankView from "@/views/ContestRankView";
 import UserPasswordView from "@/views/UserPasswordView";
+import NotFoundView from "@/views/NotFoundView";
 
 Vue.use(VueRouter)
 
 const routes = [
-    // todo 配置404页面
     {
         path: '/',
         component: HomeView
@@ -307,7 +307,6 @@ const routes = [
     },
     {
         path: '/record/:id',
-        name: 'record',
         component: RecordView,
         props: true,
         beforeEnter: function (to, from, next) {
@@ -324,8 +323,11 @@ const routes = [
     },
     {
         path: '/about',
-        name: 'about',
         component: AboutView
+    },
+    {
+        path: '*',
+        component: NotFoundView
     }
 ]
 

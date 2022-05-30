@@ -227,7 +227,7 @@ export default {
         ol: true, // 有序列表
         ul: true, // 无序列表
         link: true, // 链接
-        imagelink: false, // 图片链接 todo 实现图片上传功能
+        imagelink: false, // 图片链接
         code: true, // code
         table: true, // 表格
         fullscreen: false, // 全屏编辑

@@ -49,8 +49,6 @@
 <script>
 import axios from "@/utils/axios";
 
-// todo 页面太宽，也许侧边可以加些其他元素，或添加算法标签
-
 export default {
   name: "ProblemsView",
   data: function () {
