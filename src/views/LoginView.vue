@@ -15,7 +15,7 @@
                     v-model="loginInfo.password"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="login">登录</el-button>
+          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="login" :disabled="loginLoading">登录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -29,6 +29,7 @@ export default {
   name: "LoginView",
   data: function () {
     return {
+      loginLoading: false,
       loginInfo: {
         username: "",
         password: ""
@@ -41,18 +42,22 @@ export default {
   },
   methods: {
     login: function () {
+      this.loginLoading = true
       if (this.$root.loginStatus.login) {
         this.$message.error("已登录，如需切换账号请先登出")
+        this.loginLoading = false
         return
       }
       this.$refs.loginForm.validate().then(() => {
             axios.post("/accounts/login", this.loginInfo)
                 .then((response) => {
+                  this.loginLoading = false
                   this.$message.success("登录成功")
                   this.$root.loginStatus = response.data
                   this.$router.push("/")
                 })
                 .catch((error) => {
+                  this.loginLoading = false
                   this.$message.error(error.response.data)
                 })
           }

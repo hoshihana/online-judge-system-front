@@ -48,7 +48,7 @@
                       :value="option.value">
                   </el-option>
                 </el-select>
-                <el-button type="danger" size="medium" style="margin-top: 20px" plain @click="submitCode">
+                <el-button type="danger" size="medium" style="margin-top: 20px" plain @click="submitCode" :disabled="codeSubmitLoading">
                   <font-awesome-icon icon="fa-solid fa-angles-up"></font-awesome-icon>
                   提交
                 </el-button>

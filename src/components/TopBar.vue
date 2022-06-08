@@ -1,22 +1,27 @@
 <template>
   <div style="height: 100%">
-    <el-row type="flex" justify="end" align="middle" style="height: 100%; padding: 0 20px; box-shadow: 0 2px 10px 0 rgb(164,164,164, 0.3);">
-      <el-button-group v-if="unlogin" style="font-size: small">
-        <el-button type="primary" size="mini" @click="$router.push('/login')">登录</el-button>
-        <el-button size="mini" @click="$router.push('/register')">注册</el-button>
-      </el-button-group>
-      <el-dropdown v-else @command="handleCommand">
-        <el-button type="text"><font-awesome-icon icon="fa-solid fa-user"></font-awesome-icon> {{ username }}</el-button>
-        <template #dropdown>
-          <el-dropdown-menu style="text-align: center">
-            <el-dropdown-item command="home"><font-awesome-icon icon="fa-solid  fa-home-user"></font-awesome-icon> 我的主页</el-dropdown-item>
-            <el-dropdown-item v-if="isAdmin" command="problem list"><font-awesome-icon icon="fa-solid  fa-book"></font-awesome-icon> 我的题目</el-dropdown-item>
-            <el-dropdown-item v-if="isAdmin" command="contest list"><font-awesome-icon icon="fa-solid  fa-clipboard-list"></font-awesome-icon> 我的比赛</el-dropdown-item>
-            <el-dropdown-item command="password"><font-awesome-icon icon="fa-solid  fa-key"></font-awesome-icon> 修改密码</el-dropdown-item>
-            <el-dropdown-item command="logout"><font-awesome-icon icon="fa-solid  fa-arrow-right-from-bracket"></font-awesome-icon> 登出</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+    <el-row type="flex" align="middle" style="height: 100%; padding: 0 20px 0 10px; box-shadow: 0 2px 10px 0 rgb(164,164,164, 0.3);">
+      <el-col :span="12" style="text-align: left">
+        <el-image src="logo.png" style="height: 42px"></el-image>
+      </el-col>
+      <el-col :span="12" style="text-align: right">
+        <el-button-group v-if="unlogin" style="font-size: small">
+          <el-button type="primary" size="mini" @click="$router.push('/login')">登录</el-button>
+          <el-button size="mini" @click="$router.push('/register')">注册</el-button>
+        </el-button-group>
+        <el-dropdown v-else @command="handleCommand">
+          <el-button type="text"><font-awesome-icon icon="fa-solid fa-user"></font-awesome-icon> {{ username }}</el-button>
+          <template #dropdown>
+            <el-dropdown-menu style="text-align: center">
+              <el-dropdown-item command="home"><font-awesome-icon icon="fa-solid  fa-home-user"></font-awesome-icon> 我的主页</el-dropdown-item>
+              <el-dropdown-item v-if="isAdmin" command="problem list"><font-awesome-icon icon="fa-solid  fa-book"></font-awesome-icon> 我的题目</el-dropdown-item>
+              <el-dropdown-item v-if="isAdmin" command="contest list"><font-awesome-icon icon="fa-solid  fa-clipboard-list"></font-awesome-icon> 我的比赛</el-dropdown-item>
+              <el-dropdown-item command="password"><font-awesome-icon icon="fa-solid  fa-key"></font-awesome-icon> 修改密码</el-dropdown-item>
+              <el-dropdown-item command="logout"><font-awesome-icon icon="fa-solid  fa-arrow-right-from-bracket"></font-awesome-icon> 登出</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-col>
     </el-row>
   </div>
 </template>

@@ -24,7 +24,7 @@
                     v-model="registerInfo.email"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="submit">注册</el-button>
+          <el-button type="primary" size="medium" style="width: 100%; margin: 15px 0" @click="submit" :disabled="registerLoading">注册</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -47,6 +47,7 @@ export default {
       }
     }
     return {
+      registerLoading: false,
       registerInfo: {
         username: "",
         password: "",
@@ -75,13 +76,16 @@ export default {
   },
   methods: {
     submit: function () {
+      this.registerLoading = true
       if (this.$root.loginStatus.login) {
         this.$message.error("已登录，如需注册账号请先登出")
+        this.registerLoading = false
         return
       }
       this.$refs.registerForm.validate().then( () => {
             axios.post("/accounts/register", this.$data.registerInfo)
                 .then((response) => {
+                  this.registerLoading = false
                   this.$message({
                     message: response.data,
                     type: "success"
@@ -89,6 +93,7 @@ export default {
                   this.$router.push("/login")
                 })
                 .catch((error) => {
+                  this.registerLoading = false
                   this.$message.error(error.response.data)
                 })
           }
