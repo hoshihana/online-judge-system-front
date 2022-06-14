@@ -303,7 +303,7 @@ export default {
     }
   },
   mounted: function () {
-    this.uploadUrl = process.env.BACK_BASE_URL + "/problems/" + this.id + "/test"
+    this.uploadUrl = process.env.VUE_APP_BASE_URL + "/problems/" + this.id + "/test"
     this.existent = true
     this.loading = true
     axios.get("/problems/" + this.id)

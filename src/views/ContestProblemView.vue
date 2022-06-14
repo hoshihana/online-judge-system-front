@@ -286,9 +286,6 @@ export default {
             }).catch((error) => {
               this.$message.error(error.response.data)
             })
-            if(!this.user.isParticipant) {
-              return
-            }
             // 异步获取用户在该题的提交和通过次数
             axios.get("/contests/" + this.id + "/problems/" + this.problemNumber + "/users/" + this.$root.loginStatus.userid)
                 .then((response) => {

@@ -2,7 +2,6 @@
   <div style="height: 100%">
     <el-row type="flex" align="middle" style="height: 100%; padding: 0 20px 0 10px; box-shadow: 0 2px 10px 0 rgb(164,164,164, 0.3);">
       <el-col :span="12" style="text-align: left">
-        <el-image src="logo.png" style="height: 42px"></el-image>
       </el-col>
       <el-col :span="12" style="text-align: right">
         <el-button-group v-if="unlogin" style="font-size: small">
